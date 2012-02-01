@@ -77,4 +77,12 @@ print(xtable(head(arrange(df.counts,desc(toCount)),10), caption = "Top ten users
 ##But how do we also order the columns, so eg the sortedBy column is first?
 @
 
+\begin{figure}[h!]
+  \caption{We can also include an image file that has been generated elsewhere}
+  \centering
+    \includegraphics[width=0.9\textwidth]{wordcloud-of-spreadsheet-column-ex01.png}
+\end{figure}
+
+
+
 \end{document}

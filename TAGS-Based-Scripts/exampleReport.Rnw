@@ -1,0 +1,73 @@
+\documentclass[a4paper]{article}
+\SweaveOpts{echo=FALSE}
+\usepackage{a4wide}
+\usepackage{color}
+
+<< echo = F >>=
+#The key identifies the Google spreadsheet containing the hashtag archive
+#The gid is the raw tweet archive sheet 
+key='0AqGkLMU9sHmLdG82MTNkNEd4Y1BzVEdfQ0RQOF9TTFE'
+gid=82
+source("core-TAGSExplorer-API.R")
+
+df.data=twArchParse(key,gid)
+df.counts=twCounts(df.data)
+
+require(ggplot2)
+
+barsorter=function (dfc){
+  htable= table(dfc)
+  hlevels=names(htable)[order(htable)]
+  return(factor(dfc, levels = hlevels))
+}
+@
+
+\title{Example Document Summarising Contents of a TAGSExplorer Twitter Archive\thanks{TAGSExplorer courtesy of Martin Hawksey }}
+
+\author{
+Tony Hirst\thanks{@psychemedia}\\License: CC-BY
+}
+
+\date{\today}
+
+
+\begin{document}
+
+\maketitle
+
+\renewcommand{\topfraction}{0.85}
+\renewcommand{\textfraction}{0.1}
+\renewcommand{\floatpagefraction}{0.75}
+
+\newpage
+
+\section{Twitter Archive Summary}
+This report has been automatically generated from archived Twitter data captured and sotred within a Google Spreadsheet.
+
+\subsection{RT Stats}
+A series of summary reports around retweet behaviour observed within the archive.
+
+\begin{figure}[htbp]
+\begin{center}
+<<exampleRTbarchart, fig = T, echo = F>>=
+#plot a bar chart of RT of counts
+p=ggplot() + geom_bar(aes(x=na.omit(df.data$rtof))) + opts(axis.text.x=theme_text(angle=-90,size=6)) + xlab(NULL)
+print(p)
+@
+\caption{RT bar chart}
+\end{center}
+\end{figure}
+
+\begin{figure}[htbp]
+\begin{center}
+<<exampleSortedRTodbarchart, fig = T, echo = F>>=
+#sorted plot based on computed counts - "RT of"
+df.data$hrt=barsorter(df.data$rtof)
+p=ggplot() + geom_bar(aes(x=na.omit(df.data$hrt))) + opts(axis.text.x=theme_text(angle=-90,size=6)) + xlab(NULL)
+print(p)
+@
+\caption{RT bar chart}
+\end{center}
+\end{figure}
+
+\end{document}

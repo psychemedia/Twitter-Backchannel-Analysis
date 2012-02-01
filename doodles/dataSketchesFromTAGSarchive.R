@@ -70,7 +70,7 @@ key='0AqGkLMU9sHmLdG82MTNkNEd4Y1BzVEdfQ0RQOF9TTFE'
 gid=82
 
 lwf12.data=twArchParse(key,gid)
-lwf12.counts=twCounts(ukgc2012.data)
+lwf12.counts=twCounts(lwf12.data)
 
 
 df.data=lwf12.data

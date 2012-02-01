@@ -70,4 +70,11 @@ print(p)
 \end{center}
 \end{figure}
 
+<<label=table1,echo=FALSE,results=tex>>=
+require(xtable)
+require(plyr)
+print(xtable(head(arrange(df.counts,desc(toCount)),10), caption = "Top ten users by 'to'' count",caption.placement = "top"))
+##But how do we also order the columns, so eg the sortedBy column is first?
+@
+
 \end{document}

@@ -3,6 +3,7 @@
 # The script also complies a top 10 list for all these measures. The results are then pushed back and integrated
 # into the original spareadsheet. For more information on usage read http://mashe.hawksey.info/2012/01/tags-r/
 # Related file: generate-sna-stats-push-back-to-spreadsheet.js
+# Compatibility: TAGS 3.1+
 
 
 library(igraph)

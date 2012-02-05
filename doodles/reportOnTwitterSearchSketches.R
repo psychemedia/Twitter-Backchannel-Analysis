@@ -42,3 +42,20 @@ df$rt=sapply(df$text,function(tweet) trim(str_match(tweet,"^RT (@[[:alnum:]_]*)"
 
 require(ggplot2)
 ggplot()+geom_bar(aes(x=na.omit(df$rt)))+opts(axis.text.x=theme_text(angle=-90,size=6))+xlab(NULL)
+
+#Plot of tweet behaviour by user over time
+#Based on @mediaczar's http://blog.magicbeanlab.com/networkanalysis/how-should-page-admins-deal-with-flame-wars/
+require(plyr)
+#Make use of a handy dataframe creating twitteR helper function
+tw.df=twListToDF(rdmTweets)
+#@mediaczar's plot uses a list of users ordered by accession to user list
+## 1) find earliest tweet in searchlist for each user [ http://stackoverflow.com/a/4189904/454773 ]
+tw.dfx=ddply(tw.df, .var = "screenName", .fun = function(x) {return(subset(x, created %in% min(created),select=c(screenName,created)))})
+## 2) arrange the users in accession order
+tw.dfxa=arrange(tw.dfx,-desc(created))
+## 3) Use the username accession order to order the screenName factors in the searchlist
+tw.df$screenName=factor(tw.df$screenName, levels = tw.dfxa$screenName)
+#ggplot seems to be able to cope with time typed values...
+ggplot(tw.df)+geom_point(aes(x=created,y=screenName))
+
+#TO DO: If we limit tweets according to eg RT, we should be able to get a view of RT activity?

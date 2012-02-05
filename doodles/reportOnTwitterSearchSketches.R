@@ -59,3 +59,6 @@ tw.df$screenName=factor(tw.df$screenName, levels = tw.dfxa$screenName)
 ggplot(tw.df)+geom_point(aes(x=created,y=screenName))
 
 #TO DO: If we limit tweets according to eg RT, we should be able to get a view of RT activity?
+#Alternatively, we can colour the RTs...
+tw.df$rtt=sapply(tw.df$rt,function(rt) if (is.na(rt)) 'T' else 'RT')
+ggplot(tw.df)+geom_point(aes(x=created,y=screenName,col=rtt))

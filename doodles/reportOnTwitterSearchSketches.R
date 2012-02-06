@@ -60,7 +60,7 @@ ggplot(tw.df)+geom_point(aes(x=created,y=screenName))
 
 #TO DO: If we limit tweets according to eg RT, we should be able to get a view of RT activity?
 #Alternatively, we can colour the RTs...
-tw.df$rt=sapply(df$text,function(tweet) trim(str_match(tweet,"^RT (@[[:alnum:]_]*)")[2]))
+tw.df$rt=sapply(tw.df$text,function(tweet) trim(str_match(tweet,"^RT (@[[:alnum:]_]*)")[2]))
 tw.df$rtt=sapply(tw.df$rt,function(rt) if (is.na(rt)) 'T' else 'RT')
 ggplot(tw.df)+geom_point(aes(x=created,y=screenName,col=rtt))
 

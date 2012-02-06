@@ -60,5 +60,21 @@ ggplot(tw.df)+geom_point(aes(x=created,y=screenName))
 
 #TO DO: If we limit tweets according to eg RT, we should be able to get a view of RT activity?
 #Alternatively, we can colour the RTs...
+tw.df$rt=sapply(df$text,function(tweet) trim(str_match(tweet,"^RT (@[[:alnum:]_]*)")[2]))
 tw.df$rtt=sapply(tw.df$rt,function(rt) if (is.na(rt)) 'T' else 'RT')
 ggplot(tw.df)+geom_point(aes(x=created,y=screenName,col=rtt))
+
+#Generate a plot showing how a person is RTd
+tw.df$rtof=sapply(tw.df$text,function(tweet) trim(str_match(tweet,"^RT (@[[:alnum:]_]*)")[2]))
+#Note that this doesn't show how many RTs each person got in a given time period if they got more than one...
+ggplot(subset(tw.df,subset=(!is.na(rtof))))+geom_point(aes(x=created,y=rtof))
+
+#We can start to get a feel for who RTs whom...
+require(gdata)
+#We don't want to display screenNames of folk who tweeted but didn't RT
+tw.df.rt=drop.levels(subset(tw.df,subset=(!is.na(rtof))))
+#Order the screennames of folk who did RT by accession order (ie order in which they RTd)
+tw.df.rta=arrange(ddply(tw.df.rt, .var = "screenName", .fun = function(x) {return(subset(x, created %in% min(created),select=c(screenName,created)))}),-desc(created))
+tw.df.rt$screenName=factor(tw.df.rt$screenName, levels = tw.df.rta$screenName)
+# Plot who RTd whom
+ggplot(subset(tw.df.rt,subset=(!is.na(rtof))))+geom_point(aes(x=screenName,y=rtof))+opts(axis.text.x=theme_text(angle=-90,size=6)) + xlab(NULL)

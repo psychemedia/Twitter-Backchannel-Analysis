@@ -119,3 +119,8 @@ wordcloud.generate=function(corpus,min.freq=3){
 }
 
 print(wordcloud.generate(generateCorpus(tweets,'dev8d'),7))
+
+##Generate an image file of the wordcloud
+png('test.png', width=600,height=600)
+wordcloud.generate(generateCorpus(tweets,'dev8d'),7)
+dev.off()

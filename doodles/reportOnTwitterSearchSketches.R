@@ -2,7 +2,7 @@ require(twitteR)
 #The original example used the twitteR library to pull in a user stream
 #rdmTweets <- userTimeline("psychemedia", n=100)
 #Instead, I'm going to pull in a search around a hashtag.
-searchTerm='#ukgc12'
+searchTerm='#dev8d'
 rdmTweets <- searchTwitter(searchTerm, n=500)
 # Note that the Twitter search API only goes back 1500 tweets (I think?)
 
@@ -78,3 +78,44 @@ tw.df.rta=arrange(ddply(tw.df.rt, .var = "screenName", .fun = function(x) {retur
 tw.df.rt$screenName=factor(tw.df.rt$screenName, levels = tw.df.rta$screenName)
 # Plot who RTd whom
 ggplot(subset(tw.df.rt,subset=(!is.na(rtof))))+geom_point(aes(x=screenName,y=rtof))+opts(axis.text.x=theme_text(angle=-90,size=6)) + xlab(NULL)
+
+##Note: there are also some handy, basic Twitter related functions here:
+##https://github.com/matteoredaelli/twitter-r-utils
+#For example:
+RemoveAtPeople <- function(tweet) {
+  gsub("@\\w+", "", tweet)
+}
+#Then for example:
+tweets <- as.vector(sapply(tw.df$text, RemoveAtPeople))
+
+##Wordcloud - scripts available from various sources; I used:
+#http://rdatamining.wordpress.com/2011/11/09/using-text-mining-to-find-out-what-rdatamining-tweets-are-about/
+#Call with eg: tw.c=generateCorpus(tw.df$text)
+generateCorpus= function(df,my.stopwords=c()){
+  #Install the textmining library
+  require(tm)
+  tw.corpus= Corpus(VectorSource(df))
+  # remove punctuation
+  ## I wonder if it would make sense to remove @d names first?
+  tw.corpus = tm_map(tw.corpus, removePunctuation)
+  #normalise case
+  tw.corpus = tm_map(tw.corpus, tolower)
+  # remove stopwords
+  tw.corpus = tm_map(tw.corpus, removeWords, stopwords('english'))
+  tw.corpus = tm_map(tw.corpus, removeWords, my.stopwords)
+
+  tw.corpus
+}
+
+wordcloud.generate=function(corpus,min.freq=3){
+  require(wordcloud)
+  doc.m = TermDocumentMatrix(corpus, control = list(minWordLength = 1))
+  dm = as.matrix(doc.m)
+  # calculate the frequency of words
+  v = sort(rowSums(dm), decreasing=TRUE)
+  d = data.frame(word=names(v), freq=v)
+  wc=wordcloud(d$word, d$freq, min.freq=min.freq)
+  wc
+}
+
+print(wordcloud.generate(generateCorpus(tweets,'dev8d'),7))

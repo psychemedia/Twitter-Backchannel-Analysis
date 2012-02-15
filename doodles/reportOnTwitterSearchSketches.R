@@ -124,3 +124,12 @@ print(wordcloud.generate(generateCorpus(tweets,'dev8d'),7))
 png('test.png', width=600,height=600)
 wordcloud.generate(generateCorpus(tweets,'dev8d'),7)
 dev.off()
+
+#We could make it even easier if we hide away the tweet grabbing code. eg:
+tweets.grabber=function(searchTerm,num=500){
+  require(twitteR)
+  rdmTweets = searchTwitter(searchTerm, n=num)
+  tw.df=twListToDF(rdmTweets)
+  as.vector(sapply(tw.df$text, RemoveAtPeople))
+}
+tweets=tweets.grabber('ukgc12')

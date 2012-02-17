@@ -5,6 +5,7 @@
 require(RCurl)
 require(stringr)
 
+##TO DO: I think it would be really handy of we had a way of cacheing spreadsheet calls?
 gsqAPI = function(key,query,gid=0){
   url=paste( sep="",'http://spreadsheets.google.com/tq?', 'tqx=out:csv','&tq=', curlEscape(query), '&key=', key, '&gid=', gid)
   return( read.csv( url ) ) 

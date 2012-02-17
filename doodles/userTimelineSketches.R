@@ -47,7 +47,7 @@ r_levels <- names(r_table)[order(-r_table)]
 tw.dfs$replyToSN <- factor(tw.dfs$replyToSN, levels = r_levels) 
 
 #Then we can plot the chart...
-ggplot(subset(tw.dfs,subset=(!is.na(replyToSN))),aes(x=replyToSN)) + geom_bar(aes(y = (..count..)))+opts(axis.text.x=theme_text(angle=-90,size=6))
+ggplot(subset(tw.dfs,subset=(!is.na(replyToSN))),aes(x=replyToSN)) + geom_bar(aes(y = (..count..))) + opts(axis.text.x=theme_text(angle=-90,size=6))
 
 #------
 
@@ -61,7 +61,7 @@ orderedSubset=function(dfc,min=5){
 }
 
 plotOrderedSubset=function(dfc,min=5){
-  ggplot(orderedSubset(dfc,min))+geom_bar(stat='identity',aes(x=Var1,y=Freq))
+  ggplot(orderedSubset(dfc,min))+geom_bar(stat='identity',aes(x=Var1,y=Freq)) + opts(axis.text.x=theme_text(angle=-90,size=6))
 }
 
 plotOrderedSubset(tw.dfs$replyToSN)

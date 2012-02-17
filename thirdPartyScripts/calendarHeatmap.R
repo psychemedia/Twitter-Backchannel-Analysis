@@ -7,7 +7,7 @@
 #  requires lattice, chron, grid packages                                    #
 ############################################################################## 
 
-## VIA: http://blog.revolutionanalytics.com/2009/11/charting-time-series-as-calendar-heat-maps-in-r.html
+## via: http://blog.revolutionanalytics.com/2009/11/charting-time-series-as-calendar-heat-maps-in-r.html
 ## calendarHeat: An R function to display time-series data as a calendar heatmap 
 ## Copyright 2009 Humedica. All rights reserved.
 

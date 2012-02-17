@@ -1,6 +1,10 @@
 require(twitteR)
 
+<<<<<<< HEAD
 username='twitterapi'
+=======
+username='mediaczar'
+>>>>>>> aab5665f42f2b407f1614ceb7d3d9666ba6d8fc0
 
 #the most tweets we can bring back from a user timeline is the most recent 3200...
 mht=userTimeline(username,n=2500)

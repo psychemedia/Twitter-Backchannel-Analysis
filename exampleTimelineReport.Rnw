@@ -47,8 +47,8 @@ Tony Hirst\thanks{@psychemedia}\\License: CC-BY
 \section{Twitter Usertimeline Summary}
 This report has been automatically generated from user timeline data retrieved from the Twitter API.
 
-\subsection{RT Stats}
-A series of summary reports around retweet behaviour observed within the archive.
+\subsection{Replies}
+A series of summary reports around reply and retweet behaviour observed on the sampled user timeline.
 
 
 \begin{figure}[htbp]
@@ -181,5 +181,31 @@ print(p)
 \end{center}
 \end{figure}
 
+
+
+\begin{figure}[htbp]
+\begin{center}
+<<exampleCalendarHeatmap, fig = T, echo = F>>=
+
+source('thirdpartyScripts/calendarHeatmap.R')
+p=calendarHeat(ts.sum.df$date, ts.sum.df$sum, varname=paste(username,"Twitter activity"))
+print(p)
+@
+\caption{Tweeting activity}
+\end{center}
+\end{figure}
+
+
+\begin{figure}[htbp]
+\begin{center}
+<<exampleWordcloud, fig = T, echo = F>>=
+source('doodles/wordcloud.R')
+tweets=as.vector(sapply(tw.dfs$text, RemoveAtPeople))
+p=wordcloud.generate(generateCorpus(tweets),3)
+print(p)
+@
+\caption{Example wordcloud generated from user timeline}
+\end{center}
+\end{figure}
 
 \end{document}

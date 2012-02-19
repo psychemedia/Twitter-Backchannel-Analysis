@@ -1,9 +1,9 @@
 require(twitteR)
-searchTerm='#dev8d'
+#searchTerm='#dev8d'
 #Grab the tweets
-rdmTweets <- searchTwitter(searchTerm, n=500)
+#rdmTweets <- searchTwitter(searchTerm, n=500)
 #Use a handy helper function to put the tweets into a dataframe
-tw.df=twListToDF(rdmTweets)
+#tw.df=twListToDF(rdmTweets)
 
 ##Note: there are some handy, basic Twitter related functions here:
 ##https://github.com/matteoredaelli/twitter-r-utils
@@ -12,7 +12,7 @@ RemoveAtPeople <- function(tweet) {
   gsub("@\\w+", "", tweet)
 }
 #Then for example, remove @'d names
-tweets <- as.vector(sapply(tw.df$text, RemoveAtPeople))
+#tweets <- as.vector(sapply(tw.df$text, RemoveAtPeople))
 
 ##Wordcloud - scripts available from various sources; I used:
 #http://rdatamining.wordpress.com/2011/11/09/using-text-mining-to-find-out-what-rdatamining-tweets-are-about/
@@ -47,12 +47,13 @@ wordcloud.generate=function(corpus,min.freq=3){
   wc
 }
 
-print(wordcloud.generate(generateCorpus(tweets,'dev8d'),7))
+#BASIC USAGE
+#print(wordcloud.generate(generateCorpus(tweets,'dev8d'),7))
 
-##Generate an image file of the wordcloud
-png('test.png', width=600,height=600)
-wordcloud.generate(generateCorpus(tweets,'dev8d'),7)
-dev.off()
+##EXAMPLE: Generate an image file of the wordcloud
+#png('test.png', width=600,height=600)
+#wordcloud.generate(generateCorpus(tweets,'dev8d'),7)
+#dev.off()
 
 #We could make it even easier if we hide away the tweet grabbing code. eg:
 tweets.grabber=function(searchTerm,num=500){
@@ -62,5 +63,5 @@ tweets.grabber=function(searchTerm,num=500){
   as.vector(sapply(tw.df$text, RemoveAtPeople))
 }
 #Then we could do something like:
-tweets=tweets.grabber('ukgc12')
-wordcloud.generate(generateCorpus(tweets),3)
+#tweets=tweets.grabber('ukgc12')
+#wordcloud.generate(generateCorpus(tweets),3)

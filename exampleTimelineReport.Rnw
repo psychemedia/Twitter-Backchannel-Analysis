@@ -1,0 +1,85 @@
+\documentclass[a4paper]{article}
+\SweaveOpts{echo=FALSE}
+\usepackage{a4wide}
+\usepackage{color}
+
+<< echo = F >>=
+require(twitteR)
+
+username='antderosa'
+num=200
+hourmax=8000
+#the most tweets we can bring back from a user timeline is the most recent 3200...
+mht=userTimeline(username,n=num)
+tw.df=twListToDF(mht)
+
+#As I've done in previous scripts, pull out the names of folk who have been "old-fashioned RTd"...
+require(stringr)
+trim <- function (x) sub('@','',x)
+
+tw.df$rt=sapply(tw.df$text,function(tweet) trim(str_match(tweet,"^RT (@[[:alnum:]_]*)")[2]))
+tw.df$rtt=sapply(tw.df$rt,function(rt) if (is.na(rt)) 'T' else 'RT')
+
+tw.dfs=subset(tw.df,subset=((Sys.time()-created)<hourmax))
+
+require(ggplot2)
+@
+
+\title{Example Document Summarising User Timeline Behaviour on Twitter}
+
+\author{
+Tony Hirst\thanks{@psychemedia}\\License: CC-BY
+}
+
+\date{\today}
+
+
+\begin{document}
+
+\maketitle
+
+\renewcommand{\topfraction}{0.85}
+\renewcommand{\textfraction}{0.1}
+\renewcommand{\floatpagefraction}{0.75}
+
+\newpage
+
+\section{Twitter Usertimeline Summary}
+This report has been automatically generated from user timeline data retrieved from the Twitter API.
+
+\subsection{RT Stats}
+A series of summary reports around retweet behaviour observed within the archive.
+
+
+\begin{figure}[htbp]
+\begin{center}
+<<exampleReplyToUserAccession, fig = T, echo = F>>=
+require(plyr)
+#Order the replyToSN factor levels in the order in which they were first created
+tw.dfx=ddply(tw.dfs, .var = "replyToSN", .fun = function(x) {return(subset(x, created %in% min(created),select=c(replyToSN,created)))})
+tw.dfxa=arrange(tw.dfx,-desc(created))
+tw.dfs$replyToSN=factor(tw.dfs$replyToSN, levels = tw.dfxa$replyToSN)
+
+#and plot the result
+p=ggplot(tw.dfs)+geom_point(aes(x=created,y=replyToSN))
+print(p)
+@
+\caption{Users Replied To Over Time}
+\end{center}
+\end{figure}
+
+
+\begin{figure}[htbp]
+\begin{center}
+<<exampleReplyAndRTUserAccession, fig = T, echo = F>>=
+
+p=ggplot()+geom_point(data=subset(tw.dfs,subset=(!is.na(replyToSN))),aes(x=created,y=replyToSN),col='red') + geom_point(data=subset(tw.dfs,subset=(!is.na(rt))),aes(x=created,y=rt),col='blue') + geom_point(data=subset(tw.dfs,subset=(is.na(replyToSN) & is.na(rt))),aes(x=created,y=screenName),col='green')
+
+print(p)
+@
+\caption{Originated Tweets (green), Replies to User (red) and Old Style RTs (blue) of User over time}
+\end{center}
+\end{figure}
+
+
+\end{document}

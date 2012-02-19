@@ -68,6 +68,22 @@ print(p)
 \end{center}
 \end{figure}
 
+\begin{figure}[htbp]
+\begin{center}
+<<exampleOldStyleRTUserAccession, fig = T, echo = F>>=
+#Order the rt factor levels in the order in which they were first created
+tw.dfx=ddply(tw.dfs, .var = "rt", .fun = function(x) {return(subset(x, created %in% min(created),select=c(replyToSN,created)))})
+tw.dfxa=arrange(tw.dfx,-desc(created))
+tw.dfs$rt=factor(tw.dfs$rt, levels = tw.dfxa$rt)
+
+#and plot the result
+p=ggplot(tw.dfs)+geom_point(aes(x=created,y=rt))
+print(p)
+@
+\caption{Users Old-Style RT'd Over Time}
+\end{center}
+\end{figure}
+
 
 \begin{figure}[htbp]
 \begin{center}

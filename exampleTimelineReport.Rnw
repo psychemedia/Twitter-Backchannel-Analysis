@@ -110,26 +110,31 @@ r_levels <- names(r_table)[order(-r_table)]
 #..and use this ordering to order the factor levels...
 tw.dfs$replyToSN <- factor(tw.dfs$replyToSN, levels = r_levels) 
 
-require(gdata)
-orderedSubset=function(dfc,min=5){
-  require(gdata)
-  tmp1=as.data.frame(table(tw.dfs$replyToSN))
-  tmp2=drop.levels(subset(tmp1,subset=(Freq>=min)))
-  tmp2$Var1=factor(tmp2$Var1, levels = reorder(tmp2$Var1,tmp2$Freq))
-  tmp2
-}
-
-plotOrderedSubset=function(dfc,min=5){
-  ggplot(orderedSubset(dfc,min))+geom_bar(stat='identity',aes(x=Var1,y=Freq)) + opts(axis.text.x=theme_text(angle=-90,size=8))
-}
 #Then we can plot the chart...
-p=plotOrderedSubset(tw.dfs$replyToSN)
+p=ggplot(subset(tw.dfs,subset=(!is.na(replyToSN))),aes(x=replyToSN)) + geom_bar(aes(y = (..count..))) + opts(axis.text.x=theme_text(angle=-90,size=6))
 print(p)
 @
 \caption{Plot of most heavily replied to users}
 \end{center}
 \end{figure}
 
+\begin{figure}[htbp]
+\begin{center}
+<<exampleOldRTCounts, fig = T, echo = F>>=
+r_table <- table(tw.dfs$rt)
+#..rank them...
+r_levels <- names(r_table)[order(-r_table)]
+#..and use this ordering to order the factor levels...
+tw.dfs$rt <- factor(tw.dfs$rt, levels = r_levels) 
+
+#Then we can plot the chart...
+p=ggplot(subset(tw.dfs,subset=(!is.na(rt))),aes(x=rt)) + geom_bar(aes(y = (..count..))) + opts(axis.text.x=theme_text(angle=-90,size=6))
+
+print(p)
+@
+\caption{Plot of most heavily old-style RT\'d users}
+\end{center}
+\end{figure}
 
 \begin{figure}[htbp]
 \begin{center}

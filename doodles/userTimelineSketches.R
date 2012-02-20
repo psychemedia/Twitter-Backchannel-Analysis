@@ -3,7 +3,7 @@ require(twitteR)
 username='twitterapi'
 
 #the most tweets we can bring back from a user timeline is the most recent 3200...
-mht=userTimeline(username,n=2500)
+mht=userTimeline(username,n=250)
 tw.df=twListToDF(mht)
 
 #As I've done in previous scripts, pull out the names of folk who have been "old-fashioned RTd"...
@@ -51,22 +51,6 @@ ggplot(subset(tw.dfs,subset=(!is.na(replyToSN))),aes(x=replyToSN)) + geom_bar(ae
 
 #------
 
-require(gdata)
-orderedSubset=function(dfc,min=5){
-  require(gdata)
-  tmp1=as.data.frame(table(tw.dfs$replyToSN))
-  tmp2=drop.levels(subset(tmp1,subset=(Freq>=min)))
-  tmp2$Var1=factor(tmp2$Var1, levels = reorder(tmp2$Var1,tmp2$Freq))
-  tmp2
-}
-
-plotOrderedSubset=function(dfc,min=5){
-  ggplot(orderedSubset(dfc,min))+geom_bar(stat='identity',aes(x=Var1,y=Freq)) + opts(axis.text.x=theme_text(angle=-90,size=6))
-}
-
-plotOrderedSubset(tw.dfs$replyToSN)
-
-plotOrderedSubset(tw.dfs$replyToSN,20)
 
 #------
 

@@ -130,10 +130,12 @@ hashtagAugment=function(tmp){
   tags <- str_extract_all(tmp$text, '#[a-zA-Z0-9]+')
   index <- rep.int(seq_len(nrow(tmp)), sapply(tags, length))
   tagged <- tw.dfs[index, ]
-  tagged$tags <- unlist(tags)
+  tagged$tag <- unlist(tags)
   has_no_tag <- sapply(tags, function(x) length(x) == 0L)
   not_tagged <- tmp[has_no_tag, ]
-  not_tagged$tags <- NA
+  not_tagged$tag <- NA
   rbind(tagged, not_tagged)
 }
 tw.dfst=hashtagAugment(tw.dfs)
+
+ggplot(tw.dfst,aes(x=na.omit(tag)))+geom_bar(aes(y=(..count..)))+xlab(NULL)

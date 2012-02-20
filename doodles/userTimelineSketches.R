@@ -123,3 +123,17 @@ acf(ts.sum)
 source('thirdpartyScripts/calendarHeatmap.R')
 calendarHeat(ts.sum.df$date, ts.sum.df$sum, varname=paste(username,"Twitter activity"))
 
+#------
+
+#hashtag processing via http://stackoverflow.com/a/9360445/454773
+hashtagAugment=function(tmp){
+  tags <- str_extract_all(tmp$text, '#[a-zA-Z0-9]+')
+  index <- rep.int(seq_len(nrow(tmp)), sapply(tags, length))
+  tagged <- tw.dfs[index, ]
+  tagged$tags <- unlist(tags)
+  has_no_tag <- sapply(tags, function(x) length(x) == 0L)
+  not_tagged <- tmp[has_no_tag, ]
+  not_tagged$tags <- NA
+  rbind(tagged, not_tagged)
+}
+tw.dfst=hashtagAugment(tw.dfs)

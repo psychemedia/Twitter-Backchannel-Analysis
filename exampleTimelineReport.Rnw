@@ -229,4 +229,29 @@ print(p)
 \end{center}
 \end{figure}
 
+
+\begin{figure}[htbp]
+\begin{center}
+<<exampleHashtagCount, fig = T, echo = F>>=
+#hashtag processing via http://stackoverflow.com/a/9360445/454773
+hashtagAugment=function(tmp){
+  tags <- str_extract_all(tmp$text, '#[a-zA-Z0-9]+')
+  index <- rep.int(seq_len(nrow(tmp)), sapply(tags, length))
+  tagged <- tw.dfs[index, ]
+  tagged$tag <- unlist(tags)
+  has_no_tag <- sapply(tags, function(x) length(x) == 0L)
+  not_tagged <- tmp[has_no_tag, ]
+  not_tagged$tag <- NA
+  rbind(tagged, not_tagged)
+}
+tw.dfst=hashtagAugment(tw.dfs)
+
+p=ggplot(tw.dfst,aes(x=na.omit(tag)))+geom_bar(aes(y=(..count..))) + xlab(NULL) + opts(axis.text.x=theme_text(angle=-90,size=6))
+
+print(p)
+@
+\caption{Example hashtag count}
+\end{center}
+\end{figure}
+
 \end{document}

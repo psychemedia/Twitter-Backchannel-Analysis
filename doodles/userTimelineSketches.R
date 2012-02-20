@@ -138,4 +138,16 @@ hashtagAugment=function(tmp){
 }
 tw.dfst=hashtagAugment(tw.dfs)
 
+#Plot counts of each hashtag
 ggplot(tw.dfst,aes(x=na.omit(tag)))+geom_bar(aes(y=(..count..)))+xlab(NULL)
+
+#-----
+#example of tags by replied to user
+#really need to set this up so the size can be proportional to the number of corresponding tweets
+#TO DO: need to trap case of the subset being an empty set
+ggplot(subset(tw.dfst,subset=(!is.na(tag) & !is.na(replyToSN))),aes(x=tag))+geom_point(aes(y=replyToSN))+xlab(NULL)
+
+#--
+#example of tags by RT
+#TO DO: need to trap case of the subset being an empty set
+ggplot(subset(tw.dfst,subset=(!is.na(tag) & !is.na(rt))),aes(x=tag))+geom_point(aes(y=rt))+xlab(NULL)

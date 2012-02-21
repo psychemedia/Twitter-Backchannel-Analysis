@@ -151,3 +151,12 @@ ggplot(subset(tw.dfst,subset=(!is.na(tag) & !is.na(replyToSN))),aes(x=tag))+geom
 #example of tags by RT
 #TO DO: need to trap case of the subset being an empty set
 ggplot(subset(tw.dfst,subset=(!is.na(tag) & !is.na(rt))),aes(x=tag))+geom_point(aes(y=rt))+xlab(NULL)
+
+#--
+#Order the tag factor levels in the order in which they were first created
+tw.dfx=ddply(tw.dfst, .var = "tag", .fun = function(x) {return(subset(x, created %in% min(created),select=c(tag,created)))})
+tw.dfxa=arrange(tw.dfx,-desc(created))
+tw.dfst$tag=factor(tw.dfst$tag, levels = tw.dfxa$tag)
+
+#and plot the result
+ggplot(tw.dfst)+geom_point(aes(x=created,y=tag))

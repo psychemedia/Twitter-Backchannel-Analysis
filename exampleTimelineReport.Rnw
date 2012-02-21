@@ -6,8 +6,8 @@
 << echo = F >>=
 require(twitteR)
 
-username='antderosa'
-num=200
+username='mweller'
+num=2500
 hourmax=8000
 #the most tweets we can bring back from a user timeline is the most recent 3200...
 mht=userTimeline(username,n=num)
@@ -251,6 +251,22 @@ p=ggplot(tw.dfst,aes(x=na.omit(tag)))+geom_bar(aes(y=(..count..))) + xlab(NULL) 
 print(p)
 @
 \caption{Example hashtag count}
+\end{center}
+\end{figure}
+
+\begin{figure}[htbp]
+\begin{center}
+<<exampleHashtagOverTime, fig = T, echo = F>>=
+#Order the tag factor levels in the order in which they were first created
+tw.dfx=ddply(tw.dfst, .var = "tag", .fun = function(x) {return(subset(x, created %in% min(created),select=c(tag,created)))})
+tw.dfxa=arrange(tw.dfx,-desc(created))
+tw.dfst$tag=factor(tw.dfst$tag, levels = tw.dfxa$tag)
+
+#and plot the result
+p=ggplot(tw.dfst)+geom_point(aes(x=created,y=tag))
+print(p)
+@
+\caption{Users Replied To Over Time}
 \end{center}
 \end{figure}
 

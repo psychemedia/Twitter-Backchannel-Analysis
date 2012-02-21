@@ -22,8 +22,7 @@ require(ggplot2)
 
 @
 
-\title{Example Document Summarising Contents of a TAGSExplorer Twitter Archive\thanks{TAGSExplorer courtesy of Martin Hawksey }}
-
+\title{Example Document Summarising Contents of a Twitter Search}
 \author{
 Tony Hirst\thanks{@psychemedia}\\License: CC-BY
 }

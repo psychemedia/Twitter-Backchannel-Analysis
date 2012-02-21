@@ -173,7 +173,7 @@ wordcloud.generate=function(corpus,min.freq=3){
 
 print(wordcloud.generate(generateCorpus(tweets,'dr12vitae'),7))
 @
-\caption{Accession of tweeps (highlighting old style RTs)}
+\caption{Wordcloud of tweets with @usernames excluded)}
 \end{center}
 \end{figure}
 

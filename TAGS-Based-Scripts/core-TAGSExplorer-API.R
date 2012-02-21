@@ -45,9 +45,9 @@ twCounts=function(df){
   rtby.count=data.frame(table(df$rtby))
   colnames(rtby.count)=c('Name','rtbyCount')
   #Merging datasets
-  tmp=merge(rtof.count,to.count)
-  tmp=merge(tmp,rtby.count)
-  tmp=merge(tmp,from.count)
+  tmp=merge(rtof.count,to.count,all=TRUE)
+  tmp=merge(tmp,rtby.count,all=TRUE)
+  tmp=merge(tmp,from.count,all=TRUE)
   tmp$Name=factor(tmp$Name)
   
   return(tmp)

@@ -91,9 +91,9 @@ tweets <- as.vector(sapply(tw.df$text, RemoveAtPeople))
 ##Wordcloud - scripts available from various sources; I used:
 #http://rdatamining.wordpress.com/2011/11/09/using-text-mining-to-find-out-what-rdatamining-tweets-are-about/
 #Call with eg: tw.c=generateCorpus(tw.df$text)
+require(tm)
 generateCorpus= function(df,my.stopwords=c()){
   #Install the textmining library
-  require(tm)
   tw.corpus= Corpus(VectorSource(df))
   # remove punctuation
   ## I wonder if it would make sense to remove @d names first?

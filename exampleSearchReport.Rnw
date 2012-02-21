@@ -1,0 +1,85 @@
+\documentclass[a4paper]{article}
+\SweaveOpts{echo=FALSE}
+\usepackage{a4wide}
+\usepackage{color}
+
+<< echo = F >>=
+source("core-TAGSExplorer-API.R")
+require(twitteR)
+#The original example used the twitteR library to pull in a user stream
+#rdmTweets <- userTimeline("psychemedia", n=100)
+#Instead, I'm going to pull in a search around a hashtag.
+searchTerm='#dev8d'
+rdmTweets <- searchTwitter(searchTerm, n=500)
+# Note that the Twitter search API only goes back 1500 tweets (I think?)
+df.data=twParse(rdmTweets)
+df.counts=twCounts(df.data)
+
+require(ggplot2)
+
+@
+
+\title{Example Document Summarising Contents of a TAGSExplorer Twitter Archive\thanks{TAGSExplorer courtesy of Martin Hawksey }}
+
+\author{
+Tony Hirst\thanks{@psychemedia}\\License: CC-BY
+}
+
+\date{\today}
+
+
+\begin{document}
+
+\maketitle
+
+\renewcommand{\topfraction}{0.85}
+\renewcommand{\textfraction}{0.1}
+\renewcommand{\floatpagefraction}{0.75}
+
+\newpage
+
+\section{Twitter Search Summary}
+This report has been automatically generated from Twitter data grabbed by a recent results search via the Twitter API.
+
+\subsection{RT Stats}
+A series of summary reports around retweet behaviour observed within the search results.
+
+\begin{figure}[htbp]
+\begin{center}
+<<exampleRTbarchart, fig = T, echo = F>>=
+#plot a bar chart of RT of counts
+p=ggplot() + geom_bar(aes(x=na.omit(df.data$rtof))) + opts(axis.text.x=theme_text(angle=-90,size=6)) + xlab(NULL)
+print(p)
+@
+\caption{RT bar chart}
+\end{center}
+\end{figure}
+
+\begin{figure}[htbp]
+\begin{center}
+<<exampleSortedRTodbarchart, fig = T, echo = F>>=
+#sorted plot based on computed counts - "RT of"
+df.data$hrt=barsorter(df.data$rtof)
+p=ggplot() + geom_bar(aes(x=na.omit(df.data$hrt))) + opts(axis.text.x=theme_text(angle=-90,size=6)) + xlab(NULL)
+print(p)
+@
+\caption{RT bar chart}
+\end{center}
+\end{figure}
+
+<<label=table1,echo=FALSE,results=tex>>=
+require(xtable)
+require(plyr)
+print(xtable(head(arrange(df.counts,desc(toCount)),10), caption = "Top ten users by 'to'' count",caption.placement = "top"))
+##But how do we also order the columns, so eg the sortedBy column is first?
+@
+
+\begin{figure}[h!]
+  \caption{We can also include an image file that has been generated elsewhere}
+  \centering
+    \includegraphics[width=0.9\textwidth]{wordcloud-of-spreadsheet-column-ex01.png}
+\end{figure}
+
+
+
+\end{document}

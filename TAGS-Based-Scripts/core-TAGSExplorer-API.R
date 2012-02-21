@@ -11,9 +11,9 @@ gsqAPI = function(key,query,gid=0){
   return( read.csv( url ) ) 
 }
 
-twArchParse=function(key,gid){
-  #Get data
-  df=gsqAPI(key,'select *',gid)
+
+
+twParse=function(df){
   #Parsing @ messages
   df$to=sapply(df$text,function(tweet) trim(str_extract(tweet,"^(@[[:alnum:]_]*)")))
   #Parsing RT: messages
@@ -25,6 +25,11 @@ twArchParse=function(key,gid){
   return(df)
 }
 
+twArchParse=function(key,gid){
+  #Get data
+  df=gsqAPI(key,'select *',gid)
+  twParse(df)
+}
 
 twCounts=function(df){
   #Counting @'d users

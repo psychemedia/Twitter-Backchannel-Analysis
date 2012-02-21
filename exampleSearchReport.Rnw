@@ -4,15 +4,18 @@
 \usepackage{color}
 
 << echo = F >>=
-source("core-TAGSExplorer-API.R")
+source("TAGS-Based-Scripts/core-TAGSExplorer-API.R")
 require(twitteR)
 #The original example used the twitteR library to pull in a user stream
 #rdmTweets <- userTimeline("psychemedia", n=100)
 #Instead, I'm going to pull in a search around a hashtag.
-searchTerm='#dev8d'
+searchTerm='#dr12vitae'
 rdmTweets <- searchTwitter(searchTerm, n=500)
+tw.df=twListToDF(rdmTweets)
+tw.df$from_user=tw.df$screenName
 # Note that the Twitter search API only goes back 1500 tweets (I think?)
-df.data=twParse(rdmTweets)
+df.data=twParse(tw.df)
+
 df.counts=twCounts(df.data)
 
 require(ggplot2)
@@ -73,12 +76,6 @@ require(plyr)
 print(xtable(head(arrange(df.counts,desc(toCount)),10), caption = "Top ten users by 'to'' count",caption.placement = "top"))
 ##But how do we also order the columns, so eg the sortedBy column is first?
 @
-
-\begin{figure}[h!]
-  \caption{We can also include an image file that has been generated elsewhere}
-  \centering
-    \includegraphics[width=0.9\textwidth]{wordcloud-of-spreadsheet-column-ex01.png}
-\end{figure}
 
 
 

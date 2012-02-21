@@ -54,3 +54,10 @@ twCounts=function(df){
 }
 
 trim <- function (x) sub('@','',x)
+
+#Order factors for display in an ordered bar chart
+barsorter=function (dfc){
+  htable= table(dfc)
+  hlevels=names(htable)[order(htable)]
+  return(factor(dfc, levels = hlevels))
+}

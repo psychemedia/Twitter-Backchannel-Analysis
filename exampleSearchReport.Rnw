@@ -10,7 +10,7 @@ require(twitteR)
 #rdmTweets <- userTimeline("psychemedia", n=100)
 #Instead, I'm going to pull in a search around a hashtag.
 searchTerm='#dr12vitae'
-rdmTweets <- searchTwitter(searchTerm, n=500)
+rdmTweets <- searchTwitter(searchTerm, n=1500)
 tw.df=twListToDF(rdmTweets)
 tw.df$from_user=tw.df$screenName
 # Note that the Twitter search API only goes back 1500 tweets (I think?)
@@ -73,10 +73,110 @@ print(p)
 <<label=table1,echo=FALSE,results=tex>>=
 require(xtable)
 require(plyr)
+print(xtable(head(arrange(df.counts,desc(rtofCount)),10), caption = "Top ten users by 'RT of'' count",caption.placement = "top"))
+##But how do we also order the columns, so eg the sortedBy column is first?
+@
+
+<<label=table2,echo=FALSE,results=tex>>=
 print(xtable(head(arrange(df.counts,desc(toCount)),10), caption = "Top ten users by 'to'' count",caption.placement = "top"))
 ##But how do we also order the columns, so eg the sortedBy column is first?
 @
 
+<<label=table3,echo=FALSE,results=tex>>=
+print(xtable(head(arrange(df.counts,desc(rtbyCount)),10), caption = "Top ten users by 'RT by'' count",caption.placement = "top"))
+##But how do we also order the columns, so eg the sortedBy column is first?
+@
+
+<<label=table4,echo=FALSE,results=tex>>=
+print(xtable(head(arrange(df.counts,desc(fromCount)),10), caption = "Top ten users by 'from'' count",caption.placement = "top"))
+##But how do we also order the columns, so eg the sortedBy column is first?
+@
+
+
+\begin{figure}[htbp]
+\begin{center}
+<<exampleSorted2LimitTweetbarchart, fig = T, echo = F>>=
+# Limit the data set to show only folk who tweeted twice or more in the sample
+counts=table(df.data$screenName)
+cc=subset(counts,counts>1)
+barplot(cc,las=2,cex.names =0.5)
+
+@
+\caption{Folk who tweeted twice or more in the sample}
+\end{center}
+\end{figure}
+
+
+\begin{figure}[htbp]
+\begin{center}
+<<exampleAccession, fig = T, echo = F>>=
+tw.dfx=ddply(df.data, .var = "screenName", .fun = function(x) {return(subset(x, created %in% min(created),select=c(screenName,created)))})
+## 2) arrange the users in accession order
+tw.dfxa=arrange(tw.dfx,-desc(created))
+## 3) Use the username accession order to order the screenName factors in the searchlist
+df.data$screenName=factor(df.data$screenName, levels = tw.dfxa$screenName)
+#ggplot seems to be able to cope with time typed values...
+p=ggplot(df.data)+geom_point(aes(x=created,y=screenName))
+print(p)
+@
+\caption{Accession order of tweeps}
+\end{center}
+\end{figure}
+
+\begin{figure}[htbp]
+\begin{center}
+<<exampleAccessionRT, fig = T, echo = F>>=
+
+df.data$rtt=sapply(df.data$rtof,function(rt) if (is.na(rt)) 'T' else 'RT')
+p=ggplot(df.data)+geom_point(aes(x=created,y=screenName,col=rtt))
+print(p)
+@
+\caption{Accession of tweeps (highlighting old style RTs)}
+\end{center}
+\end{figure}
+
+
+\begin{figure}[htbp]
+\begin{center}
+<<wordcloud, fig = T, echo = F>>=
+RemoveAtPeople <- function(tweet) {
+  gsub("@\\w+", "", tweet)
+}
+
+tweets <- as.vector(sapply(df.data$text, RemoveAtPeople))
+
+require(tm)
+generateCorpus= function(df,my.stopwords=c()){
+  #Install the textmining library
+  tw.corpus= Corpus(VectorSource(df))
+  # remove punctuation
+  ## I wonder if it would make sense to remove @d names first?
+  tw.corpus = tm_map(tw.corpus, removePunctuation)
+  #normalise case
+  tw.corpus = tm_map(tw.corpus, tolower)
+  # remove stopwords
+  tw.corpus = tm_map(tw.corpus, removeWords, stopwords('english'))
+  tw.corpus = tm_map(tw.corpus, removeWords, my.stopwords)
+
+  tw.corpus
+}
+
+wordcloud.generate=function(corpus,min.freq=3){
+  require(wordcloud)
+  doc.m = TermDocumentMatrix(corpus, control = list(minWordLength = 1))
+  dm = as.matrix(doc.m)
+  # calculate the frequency of words
+  v = sort(rowSums(dm), decreasing=TRUE)
+  d = data.frame(word=names(v), freq=v)
+  wc=wordcloud(d$word, d$freq, min.freq=min.freq)
+  wc
+}
+
+print(wordcloud.generate(generateCorpus(tweets,'dr12vitae'),7))
+@
+\caption{Accession of tweeps (highlighting old style RTs)}
+\end{center}
+\end{figure}
 
 
 \end{document}

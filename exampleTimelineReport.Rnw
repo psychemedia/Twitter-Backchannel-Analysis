@@ -5,9 +5,10 @@
 
 << echo = F >>=
 require(twitteR)
+source("TAGS-Based-Scripts/core-TAGSExplorer-API.R")
 
 username='mweller'
-num=2500
+num=500
 hourmax=8000
 #the most tweets we can bring back from a user timeline is the most recent 3200...
 mht=userTimeline(username,n=num)
@@ -266,8 +267,9 @@ tw.dfst$tag=factor(tw.dfst$tag, levels = tw.dfxa$tag)
 p=ggplot(tw.dfst)+geom_point(aes(x=created,y=tag))
 print(p)
 @
-\caption{Users Replied To Over Time}
+\caption{Hashtag Usage Over Time}
 \end{center}
 \end{figure}
+
 
 \end{document}

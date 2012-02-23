@@ -221,4 +221,32 @@ print(p)
 \end{center}
 \end{figure}
 
+\begin{figure}[htbp]
+\begin{center}
+<<exampleTweetsTimeseries, fig = T, echo = F>>=
+require(xts)
+#The xts function creates a timeline from a vector of values and a vector of timestamps.
+#If we know how many tweets we have, we can just create a simple list or vector containing that number of 1s
+ts=xts(rep(1,times=nrow(df.data)),df.data$created)
+
+#We can now do some handy number crunching on the timeseries, such as applying a formula to values contained with day, week, month, quarter or year time bins.
+#So for example, if we sum the unit values in daily bin, we can get a count of the number of tweets per day
+ts.sum=apply.daily(ts,sum) 
+#also apply. weekly, monthly, quarterly, yearly
+
+#If for any resason we need to turn the timeseries into a dataframe, we can:
+#http://stackoverflow.com/a/3387259/454773
+ts.sum.df=data.frame(date=index(ts.sum), coredata(ts.sum))
+
+colnames(ts.sum.df)=c('date','sum')
+
+#We can then use ggplot to plot the timeseries...
+p=ggplot(ts.sum.df)+geom_line(aes(x=date,y=sum))
+
+print(p)
+@
+\caption{Tweeting activity}
+\end{center}
+\end{figure}
+
 \end{document}

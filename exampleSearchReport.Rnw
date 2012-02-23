@@ -9,7 +9,7 @@ require(twitteR)
 #The original example used the twitteR library to pull in a user stream
 #rdmTweets <- userTimeline("psychemedia", n=100)
 #Instead, I'm going to pull in a search around a hashtag.
-searchTerm='#dr12vitae'
+searchTerm='#cetis12'
 rdmTweets <- searchTwitter(searchTerm, n=1500)
 tw.df=twListToDF(rdmTweets)
 tw.df$from_user=tw.df$screenName
@@ -171,11 +171,54 @@ wordcloud.generate=function(corpus,min.freq=3){
   wc
 }
 
-print(wordcloud.generate(generateCorpus(tweets,'dr12vitae'),7))
+print(wordcloud.generate(generateCorpus(tweets,'cetis12'),7))
 @
 \caption{Wordcloud of tweets with @usernames excluded)}
 \end{center}
 \end{figure}
 
+\begin{figure}[htbp]
+\begin{center}
+<<exampleHashtagCount, fig = T, echo = F>>=
+#hashtag processing via http://stackoverflow.com/a/9360445/454773
+hashtagAugment=function(tmp){
+  #I think we need to defend against cases with zero tagged or untagged tweets?
+  tags <- str_extract_all(tmp$text, '#[a-zA-Z0-9]+')
+  index <- rep.int(seq_len(nrow(tmp)), sapply(tags, length))
+  if (nrow(index)){
+    tagged <- tmp[index, ]
+    tagged$tag <- unlist(tags)
+  } else {tagged=data.frame()}
+  has_no_tag <- sapply(tags, function(x) length(x) == 0L)
+  if (nrow(has_not_tag)){
+    not_tagged <- tmp[has_no_tag, ]
+    not_tagged$tag <- NA} else {not_tagged=data.frame()}
+  rbind(tagged, not_tagged)
+}
+df.data.t=hashtagAugment(df.data)
+
+p=ggplot(df.data.t,aes(x=na.omit(tag)))+geom_bar(aes(y=(..count..))) + xlab(NULL) + opts(axis.text.x=theme_text(angle=-90,size=6))
+
+print(p)
+@
+\caption{Example hashtag count}
+\end{center}
+\end{figure}
+
+\begin{figure}[htbp]
+\begin{center}
+<<exampleHashtagOverTime, fig = T, echo = F>>=
+#Order the tag factor levels in the order in which they were first created
+tw.dfx=ddply(df.data.t, .var = "tag", .fun = function(x) {return(subset(x, created %in% min(created),select=c(tag,created)))})
+tw.dfxa=arrange(tw.dfx,-desc(created))
+df.data.t$tag=factor(df.data.t$tag, levels = tw.dfxa$tag)
+
+#and plot the result
+p=ggplot(df.data.t)+geom_point(aes(x=created,y=tag))
+print(p)
+@
+\caption{Hashtag Usage Over Time}
+\end{center}
+\end{figure}
 
 \end{document}

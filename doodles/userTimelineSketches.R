@@ -129,8 +129,14 @@ calendarHeat(ts.sum.df$date, ts.sum.df$sum, varname=paste(username,"Twitter acti
 hashtagAugment=function(tmp){
   tags <- str_extract_all(tmp$text, '#[a-zA-Z0-9]+')
   index <- rep.int(seq_len(nrow(tmp)), sapply(tags, length))
-  tagged <- tw.dfs[index, ]
-  tagged$tag <- unlist(tags)
+  
+  if (length(index)!=0 || index ){
+    tagged <- tmp[index, ]
+    tagged$tag <- unlist(tags)
+  } else {tagged=data.frame()}
+  #tagged <- tw.dfs[index, ]
+  #tagged$tag <- unlist(tags)
+
   has_no_tag <- sapply(tags, function(x) length(x) == 0L)
   not_tagged <- tmp[has_no_tag, ]
   not_tagged$tag <- NA

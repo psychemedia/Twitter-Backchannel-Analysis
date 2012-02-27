@@ -185,14 +185,12 @@ hashtagAugment=function(tmp){
   #I think we need to defend against cases with zero tagged or untagged tweets?
   tags <- str_extract_all(tmp$text, '#[a-zA-Z0-9]+')
   index <- rep.int(seq_len(nrow(tmp)), sapply(tags, length))
-  if (nrow(index)){
+  if (length(index)!=0 || index ){
     tagged <- tmp[index, ]
     tagged$tag <- unlist(tags)
   } else {tagged=data.frame()}
   has_no_tag <- sapply(tags, function(x) length(x) == 0L)
-  if (nrow(has_not_tag)){
-    not_tagged <- tmp[has_no_tag, ]
-    not_tagged$tag <- NA} else {not_tagged=data.frame()}
+  not_tagged <- tmp[has_no_tag, ]
   rbind(tagged, not_tagged)
 }
 df.data.t=hashtagAugment(df.data)

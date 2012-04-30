@@ -22,7 +22,7 @@ require(ggplot2)
 
 @
 
-\title{Example Document Summarising Contents of a Twitter Search - #LAK12}
+\title{Example Document Summarising Contents of a Twitter Search}
 \author{
 Tony Hirst\thanks{@psychemedia}\\License: CC-BY
 }

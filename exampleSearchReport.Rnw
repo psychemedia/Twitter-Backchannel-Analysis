@@ -126,7 +126,7 @@ This is maybe a little more meaningful - what proportion of a user's tweets are 
 \begin{figure}[htbp]
 \begin{center}
 <<exampleRTbyScatter, fig = T, echo = F,width=14,height=14>>=
-p=ggplot(df.counts)+geom_text(aes(x=fromCount,y=rtbyCount,label=Name),size=2,angle=45)
+p=ggplot(df.counts)+geom_text(aes(x=fromCount,y=rtbyCount,label=Name),size=5,angle=45)
 print(p)
 
 @
@@ -141,7 +141,7 @@ Are things any more informative if we also size labels according to the number o
 \begin{figure}[htbp]
 \begin{center}
 <<exampleRTbyScatterSized, fig = T, echo = F,width=14,height=14>>=
-p=ggplot(df.counts)+geom_text(aes(x=fromCount,y=rtbyCount,label=Name,size=rtofCount),size=2,angle=45)
+p=ggplot(df.counts)+geom_text(aes(x=fromCount,y=rtbyCount,label=Name,size=rtofCount),angle=45)
 print(p)
 
 @
@@ -155,9 +155,9 @@ If we want to get a feeling for what proportion of a person's tweets are RT's, t
 
 \begin{figure}[htbp]
 \begin{center}
-<<exampleRTQuotientScatter, fig = T, echo = F>>=
+<<exampleRTQuotientScatter, fig = T, echo = F,width=14,height=14>>=
 p=ggplot(subset(df.counts,rtbyCount>0))+geom_point(aes(x=Name,y=rtbyCount/fromCount,size=rtbyCount))
-p=p+ opts(axis.text.x=theme_text(angle=-90,size=6)) + xlab(NULL)
+p=p+ opts(axis.text.x=theme_text(angle=-90,size=5)) + xlab(NULL)
 print(p)
 
 @
@@ -222,12 +222,12 @@ print(p)
 \end{figure}
 
 \newpage
-If we're interested in folk creating new tweets, we can easily exclude the odl-style RT'd tweets from the chart.
+If we're interested in folk creating new tweets, we can easily exclude the RT'd tweets from the chart.
 \begin{figure}[htbp]
 \begin{center}
 <<exampleAccessionNoRT, fig = T, echo = F,width=12,height=16>>=
 
-p=ggplot(subset(df.data,rtt=='T'))+geom_point(aes(x=created,y=screenName,col=rtt))
+p=ggplot(subset(df.data,rtt=='T'))+geom_point(aes(x=created,y=screenName,col=rtt),colour='aquamarine3')
 p=p+opts(axis.text.y=theme_text(size=6))
 print(p)
 @
@@ -241,7 +241,7 @@ The complementary approach, only showing RTs, is a little less useful though, I 
 \begin{center}
 <<exampleAccessionOnlyRT, fig = T, echo = F,width=12,height=16>>=
 
-p=ggplot(subset(df.data,rtt=='RT'))+geom_point(aes(x=created,y=screenName),colour='blue')
+p=ggplot(subset(df.data,rtt=='RT'))+geom_point(aes(x=created,y=screenName),colour='red')
 p=p+opts(axis.text.y=theme_text(size=6))
 print(p)
 @

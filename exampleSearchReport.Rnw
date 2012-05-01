@@ -43,6 +43,8 @@ Tony Hirst\thanks{@psychemedia}\\License: CC-BY
 \section{Twitter Search Summary}
 This report has been automatically generated from Twitter data grabbed by a recent results search via the Twitter API.
 
+(I've got myself in a muddle around new style and old style RTs... I'm not sure what RT data is being parsed out correctly atm... Maybe it all is...! )
+
 \subsection{RT Stats}
 A series of summary reports around retweet behaviour observed within the search results.
 
@@ -57,11 +59,11 @@ print(p)
 \end{center}
 \end{figure}
 
-The RT bar chart shows a count of who has been old-style retweeted. This view is ordered case sensitive alphabetically.
+The RT bar chart shows a count of who has been retweeted. This view is ordered case sensitive alphabetically.
 
 \newpage
 
-This take on the RT bar chart  orders the tweeps according to their old style RT count.
+This take on the RT bar chart  orders the tweeps according to how often they were RTd.
 
 \begin{figure}[htbp]
 \begin{center}
@@ -71,7 +73,7 @@ df.data$hrt=barsorter(df.data$rtof)
 p=ggplot() + geom_bar(aes(x=na.omit(df.data$hrt))) + opts(axis.text.x=theme_text(angle=-90,size=6)) + xlab(NULL)
 print(p)
 @
-\caption{RT bar chart}
+\caption{RT of bar chart}
 \end{center}
 \end{figure}
 
@@ -101,11 +103,73 @@ print(xtable(head(arrange(df.counts,desc(fromCount)),10), caption = "Top ten use
 ##But how do we also order the columns, so eg the sortedBy column is first?
 @
 
+
+\newpage
+
+A possibly pointless comparison between the number of tweets from a user and the nimber of times they are retweeted (how many of the tweets are retweeted, for example? Lots of them a few times, or one of them lots of times?) This really needs to also convey the number of unique tweets that are retweeted, perhaps using label size?
+
+\begin{figure}[htbp]
+\begin{center}
+<<exampleRTofbyScatter, fig = T, echo = F>>=
+p=ggplot(df.counts)+geom_text(aes(x=fromCount,y=rtofCount,label=Name),size=2,angle=45)
+print(p)
+
+@
+\caption{RT of vs. tweet from counts}
+\end{center}
+\end{figure}
+
+\newpage
+
+This is maybe a little more meaningful - what proportion of a user's tweets are retweets? I guess I should put an x=y line in here to help with the comparison?
+
+\begin{figure}[htbp]
+\begin{center}
+<<exampleRTbyScatter, fig = T, echo = F,width=14,height=14>>=
+p=ggplot(df.counts)+geom_text(aes(x=fromCount,y=rtbyCount,label=Name),size=2,angle=45)
+print(p)
+
+@
+\caption{RT by vs. tweet from counts}
+\end{center}
+\end{figure}
+
+\newpage
+
+Are things any more informative if we also size labels according to the number of times each person has been retweeted? (This is a mixed signal though - RTs as counted may come from different people relating to one tweet, or from the same person over several tweets. )
+
+\begin{figure}[htbp]
+\begin{center}
+<<exampleRTbyScatterSized, fig = T, echo = F,width=14,height=14>>=
+p=ggplot(df.counts)+geom_text(aes(x=fromCount,y=rtbyCount,label=Name,size=rtofCount),size=2,angle=45)
+print(p)
+
+@
+\caption{RT by vs. tweet from counts sized by RT of count}
+\end{center}
+\end{figure}
+
+\newpage
+
+If we want to get a feeling for what proportion of a person's tweets are RT's, this may help? The size of the point is proportional to the number of tweets the person has sent.
+
+\begin{figure}[htbp]
+\begin{center}
+<<exampleRTQuotientScatter, fig = T, echo = F>>=
+p=ggplot(subset(df.counts,rtbyCount>0))+geom_point(aes(x=Name,y=rtbyCount/fromCount,size=rtbyCount))
+p=p+ opts(axis.text.x=theme_text(angle=-90,size=6)) + xlab(NULL)
+print(p)
+
+@
+\caption{RT by/tweet from ratio}
+\end{center}
+\end{figure}
+
 \newpage
 
 This chart shows folk who tweeted twice or more in the sample, ordered case sensitive alphabetically.
 
-Are tweet volumes by user useful? Is the ordering of names on the axis useful or confusing? Would ordering according to tweet cunt be more useful? If nothing else, it would help us see the distribution of tweet volumes by user?
+Are tweet volumes by user useful? Is the ordering of names on the axis useful or confusing? Would ordering according to tweet count be more useful? If nothing else, it would help us see the distribution of tweet volumes by user?
 
 \begin{figure}[htbp]
 \begin{center}
@@ -126,7 +190,7 @@ This chart, inspired by an idea from @mediaczar, shows the accession of Twitters
 
 \begin{figure}[htbp]
 \begin{center}
-<<exampleAccession, fig = T, echo = F>>=
+<<exampleAccession, fig = T, echo = F,width=12,height=16>>=
 tw.dfx=ddply(df.data, .var = "screenName", .fun = function(x) {return(subset(x, created %in% min(created),select=c(screenName,created)))})
 ## 2) arrange the users in accession order
 tw.dfxa=arrange(tw.dfx,-desc(created))
@@ -146,11 +210,11 @@ A simple hypothesis regardingthe rapid accession of large numbers of people into
 
 \begin{figure}[htbp]
 \begin{center}
-<<exampleAccessionRT, fig = T, echo = F>>=
+<<exampleAccessionRT, fig = T, echo = F,width=12,height=16>>=
 
 df.data$rtt=sapply(df.data$rtof,function(rt) if (is.na(rt)) 'T' else 'RT')
 p=ggplot(df.data)+geom_point(aes(x=created,y=screenName,col=rtt))
-p=p+opts(axis.text.y=theme_text(size=5))
+p=p+opts(axis.text.y=theme_text(size=6))
 print(p)
 @
 \caption{Accession of tweeps (highlighting old style RTs)}
@@ -158,7 +222,35 @@ print(p)
 \end{figure}
 
 \newpage
-We do this becuase we can, right? A wordcloud (with usernames removed) showing popular terms mentioned in tag bearing tweets.
+If we're interested in folk creating new tweets, we can easily exclude the odl-style RT'd tweets from the chart.
+\begin{figure}[htbp]
+\begin{center}
+<<exampleAccessionNoRT, fig = T, echo = F,width=12,height=16>>=
+
+p=ggplot(subset(df.data,rtt=='T'))+geom_point(aes(x=created,y=screenName,col=rtt))
+p=p+opts(axis.text.y=theme_text(size=6))
+print(p)
+@
+\caption{Accession of tweeps (ignoring old style RTs)}
+\end{center}
+\end{figure}
+
+\newpage
+The complementary approach, only showing RTs, is a little less useful though, I think? Note that I really should force the colour in this chart to maintain consistency of colour across all the charts in the doc...
+\begin{figure}[htbp]
+\begin{center}
+<<exampleAccessionOnlyRT, fig = T, echo = F,width=12,height=16>>=
+
+p=ggplot(subset(df.data,rtt=='RT'))+geom_point(aes(x=created,y=screenName),colour='blue')
+p=p+opts(axis.text.y=theme_text(size=6))
+print(p)
+@
+\caption{Accession of tweeps (only showing RTs)}
+\end{center}
+\end{figure}
+
+\newpage
+We do this because we can, right?;-) A wordcloud (with usernames removed) showing popular terms mentioned in tag bearing tweets.
 
 \begin{figure}[htbp]
 \begin{center}
@@ -203,7 +295,7 @@ print(wordcloud.generate(generateCorpus(tweets,'cetis12'),7))
 \end{figure}
 
 \newpage
-A chart displaying the usage of hashtags across tweets in the sampel, ordered alphabetically. Would an ordering according to the numnber of times each particular tag was used make more sense? Sould case be ignored? If case isn't ignored, should we maybe use a stacked barchart to count each case-normalised tweet, whilst also denoting the range if use of different capitalisations through stack segments? (I'm not sure I know how to do that in this case, but hey, that's what this is about, right?!;-)
+A chart displaying the usage of hashtags across tweets in the sample, ordered alphabetically. Would an ordering according to the number of times each particular tag was used make more sense? Sould case be ignored? If case isn't ignored, should we maybe use a stacked barchart to count each case-normalised tweet, whilst also denoting the range if use of different capitalisations through stack segments? (I'm not sure I know how to do that in this case, but hey, that's what this is about, right?!;-)
 
 \begin{figure}[htbp]
 \begin{center}
@@ -232,11 +324,11 @@ print(p)
 \end{figure}
 
 \newpage
-Another accession ordered usage chart, this time for hashtags appearing within the sample.
+Another accession ordered usage chart, this time for hashtags appearing within the sample. I guess I really should do a matrix style chart showing what tags were retwteeted with each other?
 
 \begin{figure}[htbp]
 \begin{center}
-<<exampleHashtagOverTime, fig = T, echo = F>>=
+<<exampleHashtagOverTime, fig = T, echo = F,width=12,height=16>>=
 #Order the tag factor levels in the order in which they were first created
 tw.dfx=ddply(df.data.t, .var = "tag", .fun = function(x) {return(subset(x, created %in% min(created),select=c(tag,created)))})
 tw.dfxa=arrange(tw.dfx,-desc(created))
@@ -255,7 +347,7 @@ Are things any more informative if we distinguish betwen tweets that were old st
 
 \begin{figure}[htbp]
 \begin{center}
-<<exampleHashtagOverTimeRTcol, fig = T, echo = F>>=
+<<exampleHashtagOverTimeRTcol, fig = T, echo = F,width=12,height=16>>=
 # plot the result
 p=ggplot(df.data.t)+geom_point(aes(x=created,y=tag,colour=rtt))
 print(p)
@@ -266,7 +358,7 @@ print(p)
 
 \newpage
 
-One of the line charts everyone expects to see - a cumulative count of tweets over time. This is coarse grained, and uses an R time series analysis function (xts/apply.daily) to generate a plot that counts tweets within day bins. (I don't think it goes down to the level of hour?)
+One of the line charts everyone expects to see - a daily count of tweets over time. This is coarse grained, and uses an R time series analysis function (xts/apply.daily) to generate a plot that counts tweets within day bins. (I don't think it goes down to the level of hour?) I gues I should also do a cumulative volume chart? And if we were looking at an archive over a long period of time, maybe even a rolling average? Or would that be too lossy of signal across the time dimension.
 
 \begin{figure}[htbp]
 \begin{center}
@@ -281,7 +373,7 @@ ts=xts(rep(1,times=nrow(df.data)),df.data$created)
 ts.sum=apply.daily(ts,sum) 
 #also apply. weekly, monthly, quarterly, yearly
 
-#If for any resason we need to turn the timeseries into a dataframe, we can:
+#If for any reason we need to turn the timeseries into a dataframe, we can:
 #http://stackoverflow.com/a/3387259/454773
 ts.sum.df=data.frame(date=index(ts.sum), coredata(ts.sum))
 
@@ -299,10 +391,10 @@ print(p)
 
 \newpage
 
-This chart shows how folk are old style RTd over time, though not by whom...
+This chart shows how folk are RTd over time, though not by whom... The ordering of tweeps is alphabetical; would it make more sense to order by number of times folk are RTd, or according to the date at which they were first RTd in the current sample?
 \begin{figure}[htbp]
 \begin{center}
-<<exampleRTofUserActivity, fig = T, echo = F>>=
+<<exampleRTofUserActivity, fig = T, echo = F,width=12,height=16>>=
 #We can start to get a feel for who RTs whom...
 #Generate a plot showing how a person is RTd
 tw.df$rtof=sapply(tw.df$text,function(tweet) trim(str_match(tweet,"^RT (@[[:alnum:]_]*)")[2]))
@@ -310,17 +402,17 @@ tw.df$rtof=sapply(tw.df$text,function(tweet) trim(str_match(tweet,"^RT (@[[:alnu
 p=ggplot(subset(tw.df,subset=(!is.na(rtof))))+geom_point(aes(x=created,y=rtof))
 print(p)
 @
-\caption{RT activity of a person}
+\caption{RT activity around a person (how they were RTd)}
 \end{center}
 \end{figure}
 
 
 \newpage
-It's easy enough to chart who was retweeted by whom, though. (I guess what this chart needs are points sized according to the number of RTs of one person by another?) A large number of points going acorss a row show that person has been retweeted by a lot of separate individuals.
+It's easy enough to chart who was retweeted by whom, though. (I guess what this chart needs are points sized according to the number of RTs of one person by another?) A large number of points going across a row show that person has been retweeted by a lot of separate individuals. I'm not sure about the ordering of tweeps in this chart though?
 
 \begin{figure}[htbp]
 \begin{center}
-<<exampleWHoRTWhom, fig = T, echo = F>>=
+<<exampleWHoRTWhom, fig = T, echo = F,width=12,height=16>>=
 #We can start to get a feel for who RTs whom...
 require(gdata)
 #We don't want to display screenNames of folk who tweeted but didn't RT
@@ -339,11 +431,11 @@ print(p)
 
 
 \newpage
-It's arguably easier to look across a row to spot who's been retweeting a lot of different people.
+It's arguably easier to look across a row to spot who's been retweeting a lot of different people. As with the previous chart, the ordering of tweeps on x and y axes doesn't really work for me in this case either. But what would be better?
 
 \begin{figure}[htbp]
 \begin{center}
-<<exampleWHoRTWhom2, fig = T, echo = F>>=
+<<exampleWHoRTWhom2, fig = T, echo = F,width=12,height=16>>=
 # Plot who RTd whom
 p=ggplot(subset(tw.df.rt,subset=(!is.na(rtof))))+geom_point(aes(y=screenName,x=rtof))+opts(axis.text.x=theme_text(angle=-90,size=6))
 p=p+xlab('Person retweeted')+ylab('Person Retweeting')

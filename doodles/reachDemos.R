@@ -21,19 +21,22 @@ ggplot(ddj_ncount) + opts(axis.text.x=theme_text(angle=-90,size=4)) + geom_liner
 
 #This is still a bit experimental
 #I'm playing around trying to see what proportion or number of a users followers are new to, or subsumed by, the potential audience of the tag to date...
-ggplot(ddj_ncount) + geom_linerange(aes(x=newuser,ymin=0,ymax=1-(count-previousCount)/userFoCount)) + opts(axis.text.x=theme_text(angle=-90,size=6)) + xlab(NULL)
+ggplot(ddj_ncount) + geom_linerange(aes(x=newuser,ymin=0,ymax=(count-previousCount)/userFoCount)) + opts(axis.text.x=theme_text(angle=-90,size=6)) + xlab(NULL)
+
+#It may be better to plot the ratio as a point with dot size relative to the (log) of the number of followers?
+ggplot(ddj_ncount) + geom_point(aes(x=newuser,y=(count-previousCount)/userFoCount,size=userFoCount,colour=log(userFoCount))) + opts(axis.text.x=theme_text(angle=-90,size=6)) + xlab(NULL)
+
+#It may be better to plot the ratio as a point with dot size relative to the (log) of the number of followers?
+ggplot(ddj_ncount) + geom_point(aes(x=newuser,y=1-(count-previousCount)/userFoCount,size=userFoCount,colour=log(userFoCount))) + opts(axis.text.x=theme_text(angle=-90,size=6)) + xlab(NULL)+ scale_colour_gradient(low='blue',high='red')
 
 
 
-
-
-
-#require(igraph)
+require(igraph)
 
 #Read in the graph: the graphs contain nodes representing Twitter users connected by directed weighted edges that represent 'is followed by' relations. The weights correspond to the number of hashtagged messages published by the from-node over the sample period 
-#g2=read.graph('/Users/ajh59/code/twapps/newt/reports/tmp/ddj_ncount.graphml',format='graphml')
+g2=read.graph('/Users/ajh59/code/twapps/newt/reports/tmp/lak12_ncount.graphml',format='graphml')
 
-g2=ddj_ncount
+
 summary(g2)
 #The summary provides an overview of the graph, The number of nodes corresponds to the number of folk in the union of the set of hashtaggers and their followers, for example.
 
@@ -76,3 +79,4 @@ sum(tagger.nodes$Freq)
 
 #And the distribution of how many followers they have
 ggplot(tagger.nodes)+geom_histogram(aes(x=Var1,ymin=0,ymax=Freq),binwidth=250)  + xlab('Follower count')
+

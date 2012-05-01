@@ -2,6 +2,7 @@
 \SweaveOpts{echo=FALSE}
 \usepackage{a4wide}
 \usepackage{color}
+\usepackage{lscape}
 
 << echo = F >>=
 source("TAGS-Based-Scripts/core-TAGSExplorer-API.R")
@@ -45,7 +46,7 @@ This report has been automatically generated from Twitter data grabbed by a rece
 
 (I've got myself in a muddle around new style and old style RTs... I'm not sure what RT data is being parsed out correctly atm... Maybe it all is...! )
 
-\subsection{RT Stats}
+\subsection{Tweet and RT Stats}
 A series of summary reports around retweet behaviour observed within the search results.
 
 \begin{figure}[htbp]
@@ -445,4 +446,274 @@ print(p)
 \end{center}
 \end{figure}
 
+\newpage
+\subsection{Tweet and RT Stats}
+The following charts are generated from an analysis of the networks of people following hashtag users.
+
+\begin{figure}[htbp]
+\begin{center}
+<<exampleReachAccessionTweeps, fig = T, echo = F,width=12,height=16>>=
+
+ddj_ncount <- read.csv("~/code/twapps/newt/reports/tmp/lak12_ncount.csv")
+#Convert the datetime string to a time object
+ddj_ncount$ttime=as.POSIXct(strptime(ddj_ncount$datetime, "%a, %d %b %Y %H:%M:%S"),tz='UTC')
+
+#Order the newuser factor levels into the order in which they first use the tag
+dda=subset(ddj_ncount,select=c('ttime','newuser'))
+dda=arrange(dda,-desc(ttime))
+ddj_ncount$newuser=factor(ddj_ncount$newuser, levels = dda$newuser)
+
+#Plot when each user first used the tag against time
+p=ggplot(ddj_ncount) + geom_point(aes(x=ttime,y=newuser)) + opts(axis.text.x=theme_text(size=6),axis.text.y=theme_text(size=4))
+print(p)
+@
+\caption{Accession of tweeps}
+\end{center}
+\end{figure}
+
+To begin with, let's just recap on the accession order of tweeps into their usage of the hashtag (as recorded in the sample period) over time.
+
+
+\newpage
+
+This chart plots the possible reach of the hashtag, based on the follower counts of each of the hashtag users. The red trace simply sums the follower count of tag users; the blue trace is a count of unique followers. THe green trace is the number of 'repeated' followers, ie folk who follow two or more of the hashtag users.
+Note that we could also chart the N-tag user followers, to display folk following N or more of the hashtag users.
+\begin{figure}[htbp]
+\begin{center}
+<<exampleReachCount, fig = T, echo = F>>=
+
+#Plot the cumulative and union flavours of increasing possible audience size, as well as the difference between them
+p=ggplot(ddj_ncount) + geom_line(aes(x=ttime,y=count,col='Unique followers')) + geom_line(aes(x=ttime,y=crudetot,col='Cumulative followers')) + geom_line(aes(x=ttime,y=crudetot-count,col='Repeated followers'))
+p=p+ labs(colour='Type') + xlab(NULL)
+print(p)
+@
+\caption{Audience reach}
+\end{center}
+\end{figure}
+
+
+\newpage
+
+This chart attempts to identify the increased reach achieved over time through new users using the hashtag for the first time.
+
+\begin{figure}[htbp]
+\begin{center}
+<<exampleReachDelta, fig = T, echo = F>>=
+
+#Number of new unique followers introduced at each time step
+p=ggplot(ddj_ncount)+geom_line(aes(x=ttime,y=count-previousCount,col='Actual delta'))
+
+print(p)
+@
+\caption{Increased reach over time}
+\end{center}
+\end{figure}
+
+\newpage
+
+The reach improvement by user chart attempts to capture the increase in reach for the tag for each new hashtagger. The total height of the bar represents the follower count for each user. The red segment represents the increased reach for the hashtag (in the sample period) based on that user's follower network. The size of visible blue segment represents the number of followers for each user that may have already seen the hashtag.
+
+\SweaveOpts{width=12,height=7}
+\setkeys{Gin}{width=1.5\textwidth}
+\begin{landscape}
+
+\begin{figure}[htbp]
+\begin{center}
+<<exampleReachDeltaByUser, fig = T, echo = F>>=
+
+#Try to get some idea of how many of the followers of a new user are actually new potential audience members
+ggplot(ddj_ncount) + opts(axis.text.x=theme_text(angle=-90,size=4)) + geom_linerange(aes(x=newuser,ymin=0,ymax=userFoCount,col='Follower count')) + geom_linerange(aes(x=newuser,ymin=0,ymax=(count-previousCount),col='Actual new audience'))
+
+print(p)
+@
+\caption{Reach proportion by user}
+\end{center}
+\end{figure}
+
+\end{landscape}
+\SweaveOpts{width=6,height=6}
+\setkeys{Gin}{width=0.8\textwidth}
+
+
+\newpage
+
+This experimental view represents the "reach duplication quotient" for each user that reports the proportion of their followers that have had a prior opportunity of seeing the hashtag in their stream. One problem with this chart is that is doesn't capture the actual size of a user's follower network, so we donlt get much idea about how many new viewers of the tag each user brings.
+
+\SweaveOpts{width=12,height=7}
+\setkeys{Gin}{width=1.5\textwidth}
+\begin{landscape}
+
+\begin{figure}[htbp]
+\begin{center}
+<<exampleReachDuplicationQuotient, fig = T, echo = F,width=16>>=
+
+#This is still a bit experimental
+#I'm playing around trying to see what proportion or number of a users followers are new to, or subsumed by, the potential audience of the tag to date...
+p=ggplot(ddj_ncount) + geom_linerange(aes(x=newuser,ymin=0,ymax=1-(count-previousCount)/userFoCount)) + opts(axis.text.x=theme_text(angle=-90,size=6)) + xlab(NULL)
+
+print(p)
+@
+\caption{Reach duplication quotient by user}
+\end{center}
+\end{figure}
+
+\end{landscape}
+\SweaveOpts{width=6,height=6}
+\setkeys{Gin}{width=0.8\textwidth}
+
+\newpage
+
+This counter to the previous view, the "reach offering quotient" for each user that reports the proportion of their followers that have not had a prior opportunity of seeing the hashtag in their stream (that is, it suggests what proportion of a user's followers have not been previously exposed to the tag within the sample period). As before, a problem with this chart is that is doesn't capture the actual size of a user's follower network, so we donlt get much idea about how many new viewers of the tag each user brings.
+
+\SweaveOpts{width=12,height=7}
+\setkeys{Gin}{width=1.5\textwidth}
+\begin{landscape}
+
+\begin{figure}[htbp]
+\begin{center}
+<<exampleReachOfferingQuotient, fig = T, echo = F,width=16>>=
+
+p=ggplot(ddj_ncount) + geom_linerange(aes(x=newuser,ymin=0,ymax=(count-previousCount)/userFoCount)) + opts(axis.text.x=theme_text(angle=-90,size=6)) + xlab(NULL)
+
+print(p)
+@
+\caption{Reach offering quotient by user}
+\end{center}
+\end{figure}
+
+\end{landscape}
+\SweaveOpts{width=6,height=6}
+\setkeys{Gin}{width=0.8\textwidth}
+
+\newpage
+This chart tries to capture something of the follower count of each new user, and what proportion of it is new to the hashtag reach audience.
+
+
+\SweaveOpts{width=12,height=7}
+\setkeys{Gin}{width=1.5\textwidth}
+\begin{landscape}
+
+\begin{figure}[htbp]
+\begin{center}
+<<exampleReachImprovmentQuotientScatter, fig = T, echo = F,width=16>>=
+
+#It may be better to plot the ratio as a point with dot size relative to the (log) of the number of followers?
+p=ggplot(ddj_ncount) + geom_point(aes(x=newuser,y=(count-previousCount)/userFoCount,size=userFoCount,colour=log(userFoCount))) + opts(axis.text.x=theme_text(angle=-90,size=6)) + xlab(NULL)
+
+
+print(p)
+@
+\caption{Reach offering by user}
+\end{center}
+\end{figure}
+
+\end{landscape}
+\SweaveOpts{width=6,height=6}
+\setkeys{Gin}{width=0.8\textwidth}
+
+\newpage
+The same chart as before, although with a different colour resolution.
+
+\SweaveOpts{width=12,height=7}
+\setkeys{Gin}{width=1.5\textwidth}
+\begin{landscape}
+
+\begin{figure}[htbp]
+\begin{center}
+<<exampleReachImprovmentQuotientScatterColour, fig = T, echo = F,width=16>>=
+
+#It may be better to plot the ratio as a point with dot size relative to the (log) of the number of followers?
+p=p+scale_colour_gradient(low='blue',high='red')
+print(p)
+@
+\caption{Reach offering by user}
+\end{center}
+\end{figure}
+
+\end{landscape}
+\SweaveOpts{width=6,height=6}
+\setkeys{Gin}{width=0.8\textwidth}
+
+\newpage
+The follower hit distribution displays the number of followers (y-axis) against the number of hashtaggers they follow. 
+
+\begin{figure}[htbp]
+\begin{center}
+<<exampleReachfollowersIndegree, fig = T, echo = F>>=
+require(igraph)
+
+#Read in the graph: the graphs contain nodes representing Twitter users connected by directed weighted edges that represent 'is followed by' relations. The weights correspond to the number of hashtagged messages published by the from-node over the sample period 
+g2=read.graph('/Users/ajh59/code/twapps/newt/reports/tmp/lak12_ncount.graphml',format='graphml')
+
+
+#summary(g2)
+#The summary provides an overview of the graph, The number of nodes corresponds to the number of folk in the union of the set of hashtaggers and their followers, for example.
+
+#We can count how many nodes have a particular in-degree count (where' in-degree represents the number of hashtaggers the node follows)
+g.nodes=as.data.frame(table(degree(g2,mode='in')))
+g.nodes$Var1=as.numeric(levels(g.nodes$Var1)[as.integer(g.nodes$Var1)])
+
+#Check: if we sum the node occurrence frequencies, we should get the total number of nodes as a result
+tmp=sum(g.nodes$Freq)
+
+#We can then chart the result to look at the distribution of how many hashtaggers are followed by how many people
+require(ggplot2)
+p=ggplot(g.nodes)+geom_linerange(aes(x=Var1,ymin=0,ymax=Freq)) + scale_y_log10() + xlab('In-degree of followers')
+print(p)
+@
+\caption{Follower Hit Distribution}
+\end{center}
+\end{figure}
+
+\newpage
+This chart displays the number of followers (y-axis) who have had the opportunity to see a given number of hashtagged messages in their stream over the sample period. This may relate to several tweets from one person, one tweet from several people, and so on.
+Spikes may corresond to users who follow a particular individal with a large reach who has been tweeting a lot...
+
+\SweaveOpts{width=12,height=7}
+\setkeys{Gin}{width=1.5\textwidth}
+\begin{landscape}
+
+\begin{figure}[htbp]
+\begin{center}
+<<exampleReachFollowersExposure, fig = T, echo = F,width=16>>=
+
+
+#The incoming edges to follower nodes are weighted according to the number of tagged tweets the corresponding hashtagger published in the sample period.
+#What this means is that we can count the total number of tagged tweets seen by each follower by summing the weights of edges incident on each node
+g.weights=as.data.frame(table(graph.strength(g2,mode='in')))
+g.weights$Var1=as.numeric(levels(g.weights$Var1)[as.integer(g.weights$Var1)])
+#If we sum the product of message counts and frequencies, we see how many potential "receipts" of a tagged tweet there were.
+tmp=sum(g.weights$Var1*g.weights$Freq)
+
+#We can also plot the distribution of the number of tagged tweets potentially received by each follower
+p=ggplot(g.weights)+geom_linerange(aes(x=Var1,ymin=0,ymax=Freq)) + scale_y_log10() + xlab('Incoming tagged message count')
+
+print(p)
+@
+\caption{Exposure to tagged tweets}
+\end{center}
+\end{figure}
+\end{landscape}
+\SweaveOpts{width=6,height=6}
+\setkeys{Gin}{width=0.8\textwidth}
+
+\newpage
+This chart gives a view over the distribution of follower counts for hashtag users (binwidth=200).
+
+\begin{figure}[htbp]
+\begin{center}
+<<exampleFollowerReachDist, fig = T, echo = F,width=16>>=
+#It's also easy enough to chart the distribution of the follower counts for each hashtagger:
+tagger.nodes=subset(as.data.frame(table(degree(g2,mode='out'))),subset=(Var1!='0'))
+tagger.nodes$Var1=as.numeric(levels(tagger.nodes$Var1)[as.integer(tagger.nodes$Var1)])
+#Quick check on the number of taggers
+tmp=sum(tagger.nodes$Freq)
+
+#And the distribution of how many followers they have
+p=ggplot(tagger.nodes)+geom_histogram(aes(x=Var1,ymin=0,ymax=Freq),binwidth=200)  + xlab('Follower count')
+print(p)
+@
+\caption{Follower count distribution for each hashtagger}
+\end{center}
+\end{figure}
 \end{document}

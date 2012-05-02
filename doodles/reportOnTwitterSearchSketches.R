@@ -96,7 +96,7 @@ ss2=subset(tw.df.rt,subset=(!is.na(rtof) & rtof=='busynessgirl'))
 ss2x=subset(tw.df.rt,subset=(!is.na(rtof) & screenName=='busynessgirl'))
 sc2='orange'
 g=g+geom_linerange(data=ss2,aes(x=created,ymin=screenName,ymax=rtof),colour=sc2)
-g=g+geom_point(data=ss1,aes(x=created,y=rtof),colour=sc1)+geom_point(data=ss2,aes(x=created,y=screenName),colour=sc1)
+g=g+geom_point(data=ss1,aes(x=created,y=rtof),colour=sc1)+geom_point(data=ss1,aes(x=created,y=screenName),colour=sc1)
 g=g+geom_point(data=ss2,aes(x=created,y=rtof),colour=sc2)+geom_point(data=ss2,aes(x=created,y=screenName),colour=sc2)
 g=g+geom_point(data=(ss1x),aes(x=created,y=screenName),colour='black',size=1)
 g=g+geom_point(data=(ss2x),aes(x=created,y=screenName),colour='black',size=1)

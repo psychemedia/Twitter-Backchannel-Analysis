@@ -2,8 +2,9 @@ require(twitteR)
 #The original example used the twitteR library to pull in a user stream
 #rdmTweets <- userTimeline("psychemedia", n=100)
 #Instead, I'm going to pull in a search around a hashtag.
-searchTerm='#dev8d'
-rdmTweets <- searchTwitter(searchTerm, n=500)
+searchTerm='#lak12'
+searchTerm='lak12'
+rdmTweets <- searchTwitter(searchTerm, n=1500)
 # Note that the Twitter search API only goes back 1500 tweets (I think?)
 
 #Create a dataframe based around the results
@@ -79,6 +80,33 @@ tw.df.rt$screenName=factor(tw.df.rt$screenName, levels = tw.df.rta$screenName)
 # Plot who RTd whom
 ggplot(subset(tw.df.rt,subset=(!is.na(rtof))))+geom_point(aes(x=screenName,y=rtof))+opts(axis.text.x=theme_text(angle=-90,size=6)) + xlab(NULL)
 
+#Plot an RT chart showing who got RTd by whom when
+ggplot(subset(tw.df.rt,subset=(!is.na(rtof))))+geom_linerange(aes(x=created,ymin=screenName,ymax=rtof),colour='lightgrey')+geom_point(aes(x=created,y=screenName),colour='green')+geom_point(aes(x=created,y=rtof),colour='red')+opts(axis.text.y=theme_text(size=5))
+
+g=ggplot(subset(tw.df.rt,subset=(!is.na(rtof))))
+g=g+geom_linerange(aes(x=created,ymin=screenName,ymax=rtof),colour='lightgrey')
+g=g+geom_point(data=(tw.df),aes(x=created,y=screenName),colour='lightgrey')
+#g=g+geom_point(aes(x=created,y=screenName),colour='green')+geom_point(aes(x=created,y=rtof),colour='red')+opts(axis.text.y=theme_text(size=5))
+g=g+geom_point(aes(x=created,y=screenName),colour='lightgrey')+geom_point(aes(x=created,y=rtof),colour='grey')+opts(axis.text.y=theme_text(size=5))
+ss1=subset(tw.df.rt,subset=(!is.na(rtof) & rtof=='gsiemens'))
+ss1x=subset(tw.df.rt,subset=(!is.na(rtof) & screenName=='gsiemens'))
+sc1='aquamarine3'
+g=g+geom_linerange(data=ss1,aes(x=created,ymin=screenName,ymax=rtof),colour=sc1)
+ss2=subset(tw.df.rt,subset=(!is.na(rtof) & rtof=='busynessgirl'))
+ss2x=subset(tw.df.rt,subset=(!is.na(rtof) & screenName=='busynessgirl'))
+sc2='orange'
+g=g+geom_linerange(data=ss2,aes(x=created,ymin=screenName,ymax=rtof),colour=sc2)
+g=g+geom_point(data=ss1,aes(x=created,y=rtof),colour=sc1)+geom_point(data=ss2,aes(x=created,y=screenName),colour=sc1)
+g=g+geom_point(data=ss2,aes(x=created,y=rtof),colour=sc2)+geom_point(data=ss2,aes(x=created,y=screenName),colour=sc2)
+g=g+geom_point(data=(ss1x),aes(x=created,y=screenName),colour='black',size=1)
+g=g+geom_point(data=(ss2x),aes(x=created,y=screenName),colour='black',size=1)
+
+print(g)
+
+ggplot(subset(tw.df.rt,subset=(!is.na(rtof) & (screenName=='gdnhighered' ))))+geom_linerange(aes(x=created,ymin=screenName,ymax=rtof),colour='lightgrey')+geom_point(aes(x=created,y=screenName),colour='grey')+geom_point(aes(x=created,y=rtof,colour=screenName))
+
+
+
 ##Note: there are also some handy, basic Twitter related functions here:
 ##https://github.com/matteoredaelli/twitter-r-utils
 #For example:
@@ -118,12 +146,14 @@ wordcloud.generate=function(corpus,min.freq=3){
   wc
 }
 
-print(wordcloud.generate(generateCorpus(tweets,'dev8d'),7))
+print(wordcloud.generate(generateCorpus(tweets,'lak12'),7))
 
 ##Generate an image file of the wordcloud
 png('test.png', width=600,height=600)
 wordcloud.generate(generateCorpus(tweets,'dev8d'),7)
 dev.off()
+
+
 
 #We could make it even easier if we hide away the tweet grabbing code. eg:
 tweets.grabber=function(searchTerm,num=500){
@@ -132,4 +162,4 @@ tweets.grabber=function(searchTerm,num=500){
   tw.df=twListToDF(rdmTweets)
   as.vector(sapply(tw.df$text, RemoveAtPeople))
 }
-tweets=tweets.grabber('ukgc12')
+tweets=tweets.grabber('lak12')

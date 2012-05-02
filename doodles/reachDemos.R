@@ -1,3 +1,6 @@
+require(plyr)
+require(ggplot2)
+
 ddj_ncount <- read.csv("~/code/twapps/newt/reports/tmp/lak12_ncount.csv")
 #Convert the datetime string to a time object
 ddj_ncount$ttime=as.POSIXct(strptime(ddj_ncount$datetime, "%a, %d %b %Y %H:%M:%S"),tz='UTC')
@@ -15,6 +18,10 @@ ggplot(ddj_ncount) + geom_line(aes(x=ttime,y=count,col='Unique followers')) + ge
 
 #Number of new unique followers introduced at each time step
 ggplot(ddj_ncount)+geom_line(aes(x=ttime,y=count-previousCount,col='Actual delta'))
+
+#Number of new unique followers introduced at each time step, labelled
+ggplot(subset(ddj_ncount,(count-previousCount)>1000))+geom_linerange(aes(x=ttime,ymin=0,ymax=count-previousCount,col='Actual delta'))+geom_text(aes(x=ttime,y=count-previousCount,label=newuser),size=2,angle=45)
+
 
 #Try to get some idea of how many of the followers of a new user are actually new potential audience members
 ggplot(ddj_ncount) + opts(axis.text.x=theme_text(angle=-90,size=4)) + geom_linerange(aes(x=newuser,ymin=0,ymax=userFoCount,col='Follower count')) + geom_linerange(aes(x=newuser,ymin=0,ymax=(count-previousCount),col='Actual new audience'))

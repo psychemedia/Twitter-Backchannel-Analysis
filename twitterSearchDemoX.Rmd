@@ -1,0 +1,234 @@
+Example Twitter Search Report: #sotondiglit
+========================================================
+
+A graphical report on a search for up to 1500 recent tweets tagged *#sotondiglit*.
+
+First, who is being RTd, and how often were they RTd in the sample? 
+
+[Disable output with r opts_chunk$set(echo=FALSE, message=FALSE) in single backtick quotes]
+
+
+Let's start by seeing who's been tweeting most amongst the sampled tweets...
+`r opts_chunk$set(echo=FALSE, message=FALSE)`
+
+```{r }
+require(stringr)
+require(twitteR)
+require(googleVis)
+#The original example used the twitteR library to pull in a user stream
+#rdmTweets <- userTimeline("psychemedia", n=100)
+#Instead, I'm going to pull in a search around a hashtag.
+fstub='sotondiglit'
+searchTerm=paste('#',fstub,sep='')
+
+rdmTweets <- searchTwitter(searchTerm, n=1500)
+tw.df=twListToDF(rdmTweets)
+tw.df$from_user=tw.df$screenName
+# Note that the Twitter search API only goes back 1500 tweets (I think?)
+
+trim <- function (x) sub('@','',x)
+
+twParse=function(df){
+  #Parsing @ messages
+  df$to=sapply(df$text,function(tweet) trim(str_extract(tweet,"^(@[[:alnum:]_]*)")))
+  #Parsing RT: messages
+  #The str_match approach is really slow - I'm using it here rather than str_extract purely as a demo
+  df$rtof=sapply(df$text,function(tweet) trim(str_match(tweet,"^RT (@[[:alnum:]_]*)")[2]))
+  #Parsing RT: senders
+  df$rtby=paste(df$rtof,df$from_user)
+  df$rtby=sapply(df$rtby,function(dfx) if (word(dfx,1)=='NA') NA else word(dfx,2))
+  return(df)
+}
+df.data=twParse(tw.df)
+
+twCounts=function(df){
+  #Counting @'d users
+  to.count=data.frame(table(df$to))
+  colnames(to.count)=c('Name','toCount')
+  #Counting senders
+  from.count=data.frame(table(df$from_user))
+  colnames(from.count)=c('Name','fromCount')
+  #Counting rtof users
+  rtof.count=data.frame(table(df$rtof))
+  colnames(rtof.count)=c('Name','rtofCount')
+  #Counting rtby users
+  rtby.count=data.frame(table(df$rtby))
+  colnames(rtby.count)=c('Name','rtbyCount')
+  #Merging datasets
+  tmp=merge(rtof.count,to.count,all=TRUE)
+  tmp=merge(tmp,rtby.count,all=TRUE)
+  tmp=merge(tmp,from.count,all=TRUE)
+  tmp$Name=factor(tmp$Name)
+  
+  return(tmp)
+}
+
+df.counts=twCounts(df.data)
+
+#Order factors for display in an ordered bar chart
+barsorter=function (dfc){
+  htable= table(dfc)
+  hlevels=names(htable)[order(htable)]
+  return(factor(dfc, levels = hlevels))
+}
+
+require(ggplot2)
+df.data$frm=barsorter(df.data$from_user)
+p=ggplot() + geom_bar(aes(x=na.omit(df.data$frm))) + opts(axis.text.x=theme_text(angle=-90)) + xlab(NULL)
+print(p)
+```
+
+
+And who's been RTd most:
+
+```{r}
+df.data$hrt=barsorter(df.data$rtof)
+p=ggplot() + geom_bar(aes(x=na.omit(df.data$hrt))) + opts(axis.text.x=theme_text(angle=-90)) + xlab(NULL)
+print(p)
+```
+
+```{r}
+require(xtable)
+require(plyr)
+
+rtof.table=xtable(head(arrange(df.counts,desc(rtofCount),desc(fromCount)),10),type=html, caption = "Top ten users by 'RT of' and 'from' count",caption.placement = "top")
+```
+
+Start off with some simple summary tables of who's been tweeting, RTd, etc.
+
+```{r fig.width=7, fig.height=6, results='asis', tidy=FALSE}
+print(rtof.table,'html')
+```
+
+```{r fig.width=7, fig.height=6, results='asis', tidy=FALSE}
+df.counts=df.counts[,c(1,4,2,3,5)]
+x.table=xtable(head(arrange(df.counts,desc(rtbyCount),desc(fromCount)),10), caption = "Top ten users by 'RT by'' count",caption.placement = "top")
+print(x.table,'html')
+```
+
+
+```{r fig.width=7, fig.height=6, results='asis', tidy=FALSE}
+df.counts=df.counts[,c(1,5,2:4)]
+print(xtable(head(arrange(df.counts,desc(fromCount),desc(rtofCount)),10), caption = "Top ten users by 'from'' count",caption.placement = "top"),'html')
+
+```
+
+It's easy to add in Google Chart component sortable tables:
+
+```{r fig.width=7, fig.height=6,results='asis', tidy=FALSE}
+gTable <- gvisTable(df.counts, options = list(width = 600, height = 300, page = "enable"))
+print(gTable, "chart")
+```
+
+Now lets try an accession plot (based on an oriiginal idea by @mediaczar)
+
+```{r fig.width=10, fig.height=10}
+tw.dfx=ddply(df.data, .var = "screenName", .fun = function(x) {return(subset(x, created %in% min(created),select=c(screenName,created)))})
+## 2) arrange the users in accession order
+tw.dfxa=arrange(tw.dfx,-desc(created))
+## 3) Use the username accession order to order the screenName factors in the searchlist
+df.data$screenName=factor(df.data$screenName, levels = tw.dfxa$screenName)
+#ggplot seems to be able to cope with time typed values...
+p=ggplot(df.data)+geom_point(aes(x=created,y=screenName))
+p=p+opts(axis.text.y=theme_text())+ylab(NULL)+xlab(NULL)
+print(p)
+```
+The accession plot shows the accession of folk using the search term in the tweet sample, and each of their sampled tweets thereafter.
+
+We can add value to the chart by colouring tweets to see which were original tweets and which were RTs.
+
+```{r fig.width=10, fig.height=10}
+df.data$rtt=sapply(df.data$rtof,function(rt) if (is.na(rt)) 'T' else 'RT')
+p=ggplot(df.data)+geom_point(aes(x=created,y=screenName,col=rtt))
+p=p+opts(axis.text.y=theme_text())+xlab(NULL)+ylab(NULL)
+print(p)
+```
+
+We can also limit the chart to only show original tweets:
+
+```{r fig.width=10, fig.height=10}
+p=ggplot(subset(df.data,rtt=='T'))+geom_point(aes(x=created,y=screenName,col=rtt),colour='aquamarine3')
+p=p+opts(axis.text.y=theme_text())+xlab(NULL)+ylab(NULL)
+print(p)
+```
+
+Or only show RTs:
+
+```{r fig.width=10, fig.height=10}
+p=ggplot(subset(df.data,rtt=='RT'))+geom_point(aes(x=created,y=screenName),colour='red')
+p=p+opts(axis.text.y=theme_text())+xlab(NULL)+ylab(NULL)
+print(p)
+```
+
+```{r fig.width=7, fig.height=7}
+RemoveAtPeople <- function(tweet) {
+  gsub("@\\w+", "", tweet)
+}
+
+tweets <- as.vector(sapply(df.data$text, RemoveAtPeople))
+
+require(tm)
+generateCorpus= function(df,my.stopwords=c()){
+  #Install the textmining library
+  tw.corpus= Corpus(VectorSource(df))
+  # remove punctuation
+  ## I wonder if it would make sense to remove @d names first?
+  tw.corpus = tm_map(tw.corpus, removePunctuation)
+  #normalise case
+  tw.corpus = tm_map(tw.corpus, tolower)
+  # remove stopwords
+  tw.corpus = tm_map(tw.corpus, removeWords, stopwords('english'))
+  tw.corpus = tm_map(tw.corpus, removeWords, my.stopwords)
+
+  tw.corpus
+}
+
+wordcloud.generate=function(corpus,min.freq=3){
+  require(wordcloud)
+  doc.m = TermDocumentMatrix(corpus, control = list(minWordLength = 1))
+  dm = as.matrix(doc.m)
+  # calculate the frequency of words
+  v = sort(rowSums(dm), decreasing=TRUE)
+  d = data.frame(word=names(v), freq=v)
+  wc=wordcloud(d$word, d$freq, min.freq=min.freq)
+  wc
+}
+
+print(wordcloud.generate(generateCorpus(tweets),7))
+```
+
+```{r fig.width=7, fig.height=7}
+print(wordcloud.generate(generateCorpus(tweets,tolower(fstub)),7))
+```
+
+Let's look to see what tags were used in the sample four times or more:
+
+```{r fig.width=10, fig.height=10}
+#hashtag processing via http://stackoverflow.com/a/9360445/454773
+hashtagAugment=function(tmp){
+  #I think we need to defend against cases with zero tagged or untagged tweets?
+  tags <- str_extract_all(tmp$text, '#[a-zA-Z0-9]+')
+  index <- rep.int(seq_len(nrow(tmp)), sapply(tags, length))
+  if (length(index)!=0 || index ){
+    tagged <- tmp[index, ]
+    tagged$tag <- unlist(tags)
+  } else {tagged=data.frame()}
+  has_no_tag <- sapply(tags, function(x) length(x) == 0L)
+  not_tagged <- tmp[has_no_tag, ]
+  rbind(tagged, not_tagged)
+}
+df.data.t=hashtagAugment(df.data)
+tag.count=data.frame(table(df.data.t$tag))
+colnames(tag.count)=c('tag','tagCount')
+#p=ggplot(df.data.t,aes(x=na.omit(tag)))+geom_bar(aes(y=(..count..),x=reorder(tag,rep(1,length(tag)),sum))) + xlab(NULL) + opts(axis.text.x=theme_text(angle=-90,size=6))
+p=ggplot(subset(tag.count,tagCount>3),aes(x=na.omit(tag)))+geom_bar(aes(y=tagCount,stat="identity",x=reorder(tag,tagCount))) + xlab(NULL) + opts(axis.text.x=theme_text(angle=-90))
+print(p)
+```
+
+```{r fig.width=7, fig.height=6, results='asis', tidy=FALSE}
+print(xtable(head(arrange(tag.count,desc(tagCount)),10), caption = "Top ten tags",caption.placement = "top"),'html')
+
+```{r fig.width=7, fig.height=6,results='asis', tidy=FALSE}
+gTable <- gvisTable(tag.count, options = list(width = 600, height = 300, page = "enable"))
+print(gTable, "chart")
+```

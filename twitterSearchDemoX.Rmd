@@ -1,7 +1,11 @@
-Example Twitter Search Report: #sotondiglit
+Example Twitter Search Report: #hcsm
 ========================================================
 
-A graphical report on a search for up to 1500 recent tweets tagged *#sotondiglit*.
+A graphical report on a search for up to 1500 recent tweets tagged *hcsm*.
+
+If you want to run the script used to generate this report yourself using the latest version of RSTudio, you can find it here: https://github.com/psychemedia/Twitter-Backchannel-Analysis/blob/master/twitterSearchDemoX.Rmd
+
+(It requires a few R libraries you may need to install...)
 
 First, who is being RTd, and how often were they RTd in the sample? 
 
@@ -18,7 +22,7 @@ require(googleVis)
 #The original example used the twitteR library to pull in a user stream
 #rdmTweets <- userTimeline("psychemedia", n=100)
 #Instead, I'm going to pull in a search around a hashtag.
-fstub='sotondiglit'
+fstub='hcsm'
 searchTerm=paste('#',fstub,sep='')
 
 rdmTweets <- searchTwitter(searchTerm, n=1500)
@@ -161,6 +165,11 @@ print(p)
 ```
 
 ```{r fig.width=7, fig.height=7}
+
+#cleanTweet/utkf-8 chars - there must be a better w`y/handler in tm?
+df.data$origtext=df.data$text
+df.data$text=sapply(df.data$text,function(tweet) str_trim(str_replace(str_sub(str_replace(tweet,'- tweet id [[:digit:]/s]*$',''),end=-35),"^([[:alnum:]_]*:)",'')))
+
 RemoveAtPeople <- function(tweet) {
   gsub("@\\w+", "", tweet)
 }
@@ -212,9 +221,12 @@ hashtagAugment=function(tmp){
   if (length(index)!=0 || index ){
     tagged <- tmp[index, ]
     tagged$tag <- unlist(tags)
-  } else {tagged=data.frame()}
+  } else {
+    tagged=data.frame()
+  }
   has_no_tag <- sapply(tags, function(x) length(x) == 0L)
   not_tagged <- tmp[has_no_tag, ]
+  not_tagged$tag=''
   rbind(tagged, not_tagged)
 }
 df.data.t=hashtagAugment(df.data)

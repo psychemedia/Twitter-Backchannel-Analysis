@@ -3,7 +3,7 @@ require(twitteR)
 #rdmTweets <- userTimeline("psychemedia", n=100)
 #Instead, I'm going to pull in a search around a hashtag.
 searchTerm='#lak12'
-searchTerm='lak12'
+searchTerm='openstandards'
 rdmTweets <- searchTwitter(searchTerm, n=1500)
 # Note that the Twitter search API only goes back 1500 tweets (I think?)
 
@@ -83,26 +83,40 @@ ggplot(subset(tw.df.rt,subset=(!is.na(rtof))))+geom_point(aes(x=screenName,y=rto
 #Plot an RT chart showing who got RTd by whom when
 ggplot(subset(tw.df.rt,subset=(!is.na(rtof))))+geom_linerange(aes(x=created,ymin=screenName,ymax=rtof),colour='lightgrey')+geom_point(aes(x=created,y=screenName),colour='green')+geom_point(aes(x=created,y=rtof),colour='red')+opts(axis.text.y=theme_text(size=5))
 
-g=ggplot(subset(tw.df.rt,subset=(!is.na(rtof))))
-g=g+geom_linerange(aes(x=created,ymin=screenName,ymax=rtof),colour='lightgrey')
-g=g+geom_point(data=(tw.df),aes(x=created,y=screenName),colour='lightgrey')
-#g=g+geom_point(aes(x=created,y=screenName),colour='green')+geom_point(aes(x=created,y=rtof),colour='red')+opts(axis.text.y=theme_text(size=5))
-g=g+geom_point(aes(x=created,y=screenName),colour='lightgrey')+geom_point(aes(x=created,y=rtof),colour='grey')+opts(axis.text.y=theme_text(size=5))
-ss1=subset(tw.df.rt,subset=(!is.na(rtof) & rtof=='gsiemens'))
-ss1x=subset(tw.df.rt,subset=(!is.na(rtof) & screenName=='gsiemens'))
+#the base data set - exclude tweets that aren't RTs
+g = ggplot(subset(tw.df.rt,subset=(!is.na(rtof))))
+#Add in vertical grey lines connecting who RT'd whom
+g = g + geom_linerange(aes(x=created,ymin=screenName,ymax=rtof),colour='lightgrey')
+#Use a more complete dataset to mark *all* tweets with a lightgrey point
+g = g + geom_point(data=(tw.df),aes(x=created,y=screenName),colour='lightgrey')
+#Use points at either end of the RT line segment to distinguish who RTd whom
+g = g + geom_point(aes(x=created,y=screenName),colour='lightgrey') + geom_point(aes(x=created,y=rtof),colour='grey') + opts(axis.text.y=theme_text(size=5))
+#We're going to highlight RTs of two particular individuals
+#Define a couple of functions to subset the data
+subdata.rtof=function(u) return(subset(tw.df.rt,subset=(!is.na(rtof) & rtof==u)))
+subdata.user=function(u) return(subset(tw.df.rt,subset=(!is.na(rtof) & screenName==u)))
+#Grab user 1
+s1='glynmoody'
+ss1=subdata.rtof(s1)
+ss1x=subdata.user(s1)
 sc1='aquamarine3'
-g=g+geom_linerange(data=ss1,aes(x=created,ymin=screenName,ymax=rtof),colour=sc1)
-ss2=subset(tw.df.rt,subset=(!is.na(rtof) & rtof=='busynessgirl'))
-ss2x=subset(tw.df.rt,subset=(!is.na(rtof) & screenName=='busynessgirl'))
+#Highlight the RT lines associated with RTs of this user
+g = g + geom_linerange(data=ss1,aes(x=created,ymin=screenName,ymax=rtof),colour=sc1)
+#Grab user 2
+s2='MarkJBallard'
+ss2=subdata.rtof(s2)
+ss2x=subdata.user(s2)
 sc2='orange'
-g=g+geom_linerange(data=ss2,aes(x=created,ymin=screenName,ymax=rtof),colour=sc2)
-g=g+geom_point(data=ss1,aes(x=created,y=rtof),colour=sc1)+geom_point(data=ss1,aes(x=created,y=screenName),colour=sc1)
-g=g+geom_point(data=ss2,aes(x=created,y=rtof),colour=sc2)+geom_point(data=ss2,aes(x=created,y=screenName),colour=sc2)
-g=g+geom_point(data=(ss1x),aes(x=created,y=screenName),colour='black',size=1)
-g=g+geom_point(data=(ss2x),aes(x=created,y=screenName),colour='black',size=1)
-
+#Highlight the RT lines associated with RTs of this user
+g = g + geom_linerange(data=ss2,aes(x=created,ymin=screenName,ymax=rtof),colour=sc2)
+#Now we add another layer to colour the nodes associated with RTs of the two selected users
+g = g + geom_point(data=ss1,aes(x=created,y=rtof),colour=sc1) + geom_point(data=ss1,aes(x=created,y=screenName),colour=sc1)
+g = g + geom_point(data=ss2,aes(x=created,y=rtof),colour=sc2) + geom_point(data=ss2,aes(x=created,y=screenName),colour=sc2)
+#Finally, add a highlight to mark when the RTd folk we are highlighting actually tweet
+g = g + geom_point(data=(ss1x),aes(x=created,y=screenName),colour='black',size=1)
+g = g + geom_point(data=(ss2x),aes(x=created,y=screenName),colour='black',size=1)
+#Print the chart
 print(g)
-
 ggplot(subset(tw.df.rt,subset=(!is.na(rtof) & (screenName=='gdnhighered' ))))+geom_linerange(aes(x=created,ymin=screenName,ymax=rtof),colour='lightgrey')+geom_point(aes(x=created,y=screenName),colour='grey')+geom_point(aes(x=created,y=rtof,colour=screenName))
 
 

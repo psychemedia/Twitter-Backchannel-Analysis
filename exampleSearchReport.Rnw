@@ -13,7 +13,7 @@ require(twitteR)
 #Instead, I'm going to pull in a search around a hashtag.
 searchTerm='#lak12'
 searchTerm="#YesToBrumMayor OR #NoToBrumMayor OR #BrumMayor OR ((#Birmingham OR #Brum) AND (#Mayor OR #ElectedMayor))"
-fstub='lak12'
+fstub='openstandards'
 searchTerm=paste('#',fstub,sep='')
 
 rdmTweets <- searchTwitter(searchTerm, n=1500)
@@ -37,6 +37,7 @@ Tony Hirst\thanks{@psychemedia}\\License: CC-BY
 
 
 \begin{document}
+\SweaveOpts{concordance=TRUE}
 
 \maketitle
 

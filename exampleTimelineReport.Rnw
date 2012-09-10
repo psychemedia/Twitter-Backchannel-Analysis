@@ -7,9 +7,9 @@
 require(twitteR)
 source("TAGS-Based-Scripts/core-TAGSExplorer-API.R")
 
-username='mweller'
-num=500
-hourmax=8000
+username='ventnorblog'
+num=1500
+minsmax=60*24*100
 #the most tweets we can bring back from a user timeline is the most recent 3200...
 mht=userTimeline(username,n=num)
 tw.df=twListToDF(mht)
@@ -21,7 +21,7 @@ trim <- function (x) sub('@','',x)
 tw.df$rt=sapply(tw.df$text,function(tweet) trim(str_match(tweet,"^RT (@[[:alnum:]_]*)")[2]))
 tw.df$rtt=sapply(tw.df$rt,function(rt) if (is.na(rt)) 'T' else 'RT')
 
-tw.dfs=subset(tw.df,subset=((Sys.time()-created)<hourmax))
+tw.dfs=subset(tw.df,subset=((Sys.time()-created)<minsmax))
 
 require(ggplot2)
 @

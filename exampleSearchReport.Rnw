@@ -13,11 +13,15 @@ require(twitteR)
 #Instead, I'm going to pull in a search around a hashtag.
 searchTerm='#lak12'
 searchTerm="#YesToBrumMayor OR #NoToBrumMayor OR #BrumMayor OR ((#Birmingham OR #Brum) AND (#Mayor OR #ElectedMayor))"
-fstub='openstandards'
+fstub='opened12'
 searchTerm=paste('#',fstub,sep='')
 
 rdmTweets <- searchTwitter(searchTerm, n=1500)
 tw.df=twListToDF(rdmTweets)
+
+#library(iconv)
+tw.df$text=iconv(tw.df$text)
+
 tw.df$from_user=tw.df$screenName
 # Note that the Twitter search API only goes back 1500 tweets (I think?)
 df.data=twParse(tw.df)
@@ -241,7 +245,7 @@ print(p)
 \end{figure}
 
 \newpage
-A simple hypothesis regardingthe rapid accession of large numbers of people into usage of a hashtag might be that they are watching a particular event live and responding to a notable incident occurring within it. Or maybe they all suddenly retweet one or more tweets that contain the hashtag? Colouring accession chart samples according to whether or not a tweet was an RT or not may help us get a feel for whether the latter is the case... 
+A simple hypothesis regarding the rapid accession of large numbers of people into usage of a hashtag might be that they are watching a particular event live and responding to a notable incident occurring within it. Or maybe they all suddenly retweet one or more tweets that contain the hashtag? Colouring accession chart samples according to whether or not a tweet was an RT or not may help us get a feel for whether the latter is the case... 
 
 \begin{figure}[htbp]
 \begin{center}
@@ -323,7 +327,7 @@ wordcloud.generate=function(corpus,min.freq=3){
   wc
 }
 
-print(wordcloud.generate(generateCorpus(tweets),7))
+try(print(wordcloud.generate(generateCorpus(tweets),7)))
 @
 \caption{Wordcloud of tweets with @usernames excluded)}
 \end{center}
@@ -334,7 +338,7 @@ The wordcloud with the search tag excluded.
 \begin{figure}[htbp]
 \begin{center}
 <<wordcloudNoRootTag, fig = T, echo = F>>=
-print(wordcloud.generate(generateCorpus(tweets,fstub),7))
+try(print(wordcloud.generate(generateCorpus(tweets,fstub),7)))
 @
 \caption{Wordcloud of tweets with @usernames excluded)}
 \end{center}
@@ -454,7 +458,7 @@ print(p)
 
 
 \newpage
-It's easy enough to chart who was retweeted by whom, though. (I guess what this chart needs are points sized according to the number of RTs of one person by another?) A large number of points going across a row show that person has been retweeted by a lot of separate individuals. I'm not sure about the ordering of tweeps in this chart though?
+It is easy enough to chart who was retweeted by whom, though. (I guess what this chart needs are points sized according to the number of RTs of one person by another?) A large number of points going across a row show that person has been retweeted by a lot of separate individuals. I'm not sure about the ordering of tweeps in this chart though?
 
 \begin{figure}[htbp]
 \begin{center}
@@ -477,7 +481,7 @@ print(p)
 
 
 \newpage
-It's arguably easier to look across a row to spot who's been retweeting a lot of different people. As with the previous chart, the ordering of tweeps on x and y axes doesn't really work for me in this case either. But what would be better?
+It is arguably easier to look across a row to spot who's been retweeting a lot of different people. As with the previous chart, the ordering of tweeps on x and y axes doesn't really work for me in this case either. But what would be better?
 
 \begin{figure}[htbp]
 \begin{center}

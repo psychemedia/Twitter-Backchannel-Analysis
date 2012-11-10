@@ -7,7 +7,7 @@
 require(twitteR)
 source("TAGS-Based-Scripts/core-TAGSExplorer-API.R")
 
-username='ventnorblog'
+username='bishopofdurham'
 num=1500
 minsmax=60*24*100
 #the most tweets we can bring back from a user timeline is the most recent 3200...
@@ -36,6 +36,7 @@ Tony Hirst\thanks{@psychemedia}\\License: CC-BY
 
 
 \begin{document}
+\SweaveOpts{concordance=TRUE}
 
 \maketitle
 
@@ -129,9 +130,10 @@ r_levels <- names(r_table)[order(-r_table)]
 tw.dfs$rt <- factor(tw.dfs$rt, levels = r_levels) 
 
 #Then we can plot the chart...
-p=ggplot(subset(tw.dfs,subset=(!is.na(rt))),aes(x=rt)) + geom_bar(aes(y = (..count..))) + opts(axis.text.x=theme_text(angle=-90,size=6))
 
-print(p)
+  p=ggplot(subset(tw.dfs,subset=(!is.na(rt))),aes(x=rt)) + geom_bar(aes(y = (..count..))) + opts(axis.text.x=theme_text(angle=-90,size=6))
+
+  try(print(p),silent=T)
 @
 \caption{Plot of most heavily old-style RT\'d users}
 \end{center}
@@ -251,7 +253,7 @@ tw.dfst=hashtagAugment(tw.dfs)
 
 p=ggplot(tw.dfst,aes(x=na.omit(tag)))+geom_bar(aes(y=(..count..))) + xlab(NULL) + opts(axis.text.x=theme_text(angle=-90,size=6))
 
-print(p)
+try(print(p),silent=T)
 @
 \caption{Example hashtag count}
 \end{center}
@@ -267,7 +269,7 @@ tw.dfst$tag=factor(tw.dfst$tag, levels = tw.dfxa$tag)
 
 #and plot the result
 p=ggplot(tw.dfst)+geom_point(aes(x=created,y=tag))
-print(p)
+try(print(p),silent=T)
 @
 \caption{Hashtag Usage Over Time}
 \end{center}
